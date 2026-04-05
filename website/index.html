@@ -854,18 +854,29 @@ body {
 }
 .glitter-particle {
   position: absolute;
-  border-radius: 50%;
   pointer-events: none;
-  animation: glitter-burst 0.8s ease-out forwards;
+  animation: glitter-burst var(--dur, 1s) ease-out forwards;
+}
+.glitter-particle.circle { border-radius: 50%; }
+.glitter-particle.star {
+  background: transparent !important;
+  width: 0 !important; height: 0 !important;
+  border-left: var(--star-size, 4px) solid transparent;
+  border-right: var(--star-size, 4px) solid transparent;
+  border-bottom: calc(var(--star-size, 4px) * 1.8) solid var(--star-color, #e8d48b);
+  filter: drop-shadow(0 0 4px var(--star-color, #e8d48b));
 }
 @keyframes glitter-burst {
   0% {
     opacity: 1;
-    transform: translate(0, 0) scale(1);
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  40% {
+    opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: translate(var(--gx), var(--gy)) scale(0);
+    transform: translate(var(--gx), var(--gy)) scale(0.2) rotate(var(--rot, 180deg));
   }
 }
 
@@ -879,15 +890,17 @@ body {
       0 2px 8px rgba(0,0,0,0.5),
       inset 0 1px 2px rgba(255,255,255,0.3),
       inset 0 -1px 2px rgba(0,0,0,0.3),
-      0 0 12px rgba(201,168,76,0.15);
+      0 0 15px rgba(201,168,76,0.3),
+      0 0 30px rgba(201,168,76,0.1);
   }
   50% {
     box-shadow:
       0 2px 8px rgba(0,0,0,0.5),
-      inset 0 1px 2px rgba(255,255,255,0.3),
+      inset 0 1px 2px rgba(255,255,255,0.4),
       inset 0 -1px 2px rgba(0,0,0,0.3),
-      0 0 30px rgba(201,168,76,0.45),
-      0 0 60px rgba(201,168,76,0.15);
+      0 0 40px rgba(201,168,76,0.7),
+      0 0 80px rgba(201,168,76,0.35),
+      0 0 120px rgba(232,212,139,0.15);
   }
 }
 
@@ -1703,54 +1716,70 @@ new Vue({
     // Glitter burst at a point
     spawnGlitter: function (x, y, count, spread) {
       var container = document.getElementById('glitterContainer');
-      var colors = ['#c9a84c', '#e8d48b', '#fff6d5', '#8a6d2b', '#ffe09a'];
-      count = count || 18;
-      spread = spread || 80;
+      var colors = ['#c9a84c', '#e8d48b', '#fff6d5', '#ffe09a', '#ffd700', '#ffffff'];
+      count = count || 24;
+      spread = spread || 100;
       for (var i = 0; i < count; i++) {
         var particle = document.createElement('div');
-        particle.className = 'glitter-particle';
-        var size = Math.random() * 5 + 2;
-        var angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.8;
-        var dist = Math.random() * spread + 20;
+        var isStar = Math.random() > 0.5;
+        particle.className = 'glitter-particle ' + (isStar ? 'star' : 'circle');
+        var color = colors[Math.floor(Math.random() * colors.length)];
+        var size = Math.random() * 7 + 3;
+        var angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+        var dist = Math.random() * spread + 30;
         var gx = Math.cos(angle) * dist;
-        var gy = Math.sin(angle) * dist;
-        particle.style.width = size + 'px';
-        particle.style.height = size + 'px';
+        var gy = Math.sin(angle) * dist - 20; // bias upward
+        var dur = Math.random() * 0.6 + 0.6;
+        var rot = Math.floor(Math.random() * 360);
         particle.style.left = x + 'px';
         particle.style.top = y + 'px';
-        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-        particle.style.boxShadow = '0 0 ' + (size + 2) + 'px ' + particle.style.background;
         particle.style.setProperty('--gx', gx + 'px');
         particle.style.setProperty('--gy', gy + 'px');
-        particle.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+        particle.style.setProperty('--dur', dur + 's');
+        particle.style.setProperty('--rot', rot + 'deg');
+        if (isStar) {
+          var starSize = Math.random() * 4 + 2;
+          particle.style.setProperty('--star-size', starSize + 'px');
+          particle.style.setProperty('--star-color', color);
+        } else {
+          particle.style.width = size + 'px';
+          particle.style.height = size + 'px';
+          particle.style.background = color;
+          particle.style.boxShadow = '0 0 ' + (size * 2) + 'px ' + color + ', 0 0 ' + (size * 4) + 'px ' + color;
+        }
         container.appendChild(particle);
         (function (p) {
-          setTimeout(function () { p.remove(); }, 1000);
+          setTimeout(function () { if (p.parentNode) p.remove(); }, 1500);
         })(particle);
       }
     },
 
     openBookWithGlitter: function (e) {
-      this.spawnGlitter(e.clientX, e.clientY, 30, 120);
+      var self = this;
+      this.spawnGlitter(e.clientX, e.clientY, 45, 160);
+      // Second delayed wave for extra drama
+      setTimeout(function () {
+        self.spawnGlitter(e.clientX, e.clientY, 25, 200);
+      }, 150);
       this.openBook();
     },
 
     prevPageGlitter: function (e) {
       if (this.currentSpread > 0) {
-        this.spawnGlitter(e.clientX, e.clientY, 12, 50);
+        this.spawnGlitter(e.clientX, e.clientY, 18, 70);
         this.prevPage();
       }
     },
 
     nextPageGlitter: function (e) {
       if (this.currentSpread < this.spreads.length - 1) {
-        this.spawnGlitter(e.clientX, e.clientY, 12, 50);
+        this.spawnGlitter(e.clientX, e.clientY, 18, 70);
         this.nextPage();
       }
     },
 
     goToCardGlitter: function (e, cardIndex) {
-      this.spawnGlitter(e.clientX, e.clientY, 15, 60);
+      this.spawnGlitter(e.clientX, e.clientY, 20, 80);
       this.goToCard(cardIndex);
     }
   },
