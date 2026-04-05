@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xdg-open:*)",
+      "Bash(node:*)",
+      "Bash(python3 -m http.server 8080)",
+      "Bash(ls /home/rgr/Desktop/deck/counter*inter*)",
+      "Bash(python3:*)"
+    ]
+  }
+}
