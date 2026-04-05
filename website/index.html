@@ -587,6 +587,12 @@ body {
   background: linear-gradient(90deg, var(--paper-dark) 25%, var(--paper) 50%, var(--paper-dark) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.card-image-container img.loaded ~ .img-shimmer,
+.card-image-container .img-shimmer.hidden {
+  opacity: 0;
 }
 @keyframes shimmer {
   0% { background-position: 200% 0; }
@@ -1032,11 +1038,10 @@ body {
 
           <!-- TOC Right -->
           <div v-if="spread.type === 'toc'" key="toc-right" class="card-image-container">
-            <div v-show="!imgLoaded['toc']" class="img-shimmer"></div>
             <img v-lazy="'../summon computer sciencepng.webp'"
-                 data-lazy-key="toc"
                  alt="Computer Scientist Summon"
                  decoding="async">
+            <div class="img-shimmer"></div>
           </div>
 
           <!-- Category Right -->
@@ -1050,11 +1055,10 @@ body {
 
           <!-- Card Right -->
           <div v-else :key="'card-r-' + spread.cardIndex" class="card-image-container">
-            <div v-show="!imgLoaded['card-' + spread.cardIndex]" class="img-shimmer"></div>
             <img v-lazy="currentCard.image"
-                 :data-lazy-key="'card-' + spread.cardIndex"
                  :alt="currentCard.name"
                  decoding="async">
+            <div class="img-shimmer"></div>
           </div>
 
         </transition>
