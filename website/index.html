@@ -843,6 +843,59 @@ body {
   color: var(--gold-dark);
 }
 
+/* ===== GLITTER EFFECTS ===== */
+.glitter-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+}
+.glitter-particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: glitter-burst 0.8s ease-out forwards;
+}
+@keyframes glitter-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--gx), var(--gy)) scale(0);
+  }
+}
+
+/* Buckle pulsing glow to guide user */
+.book-closed:not(.hidden) .belt-buckle {
+  animation: buckle-glow 2.5s ease-in-out infinite;
+}
+@keyframes buckle-glow {
+  0%, 100% {
+    box-shadow:
+      0 2px 8px rgba(0,0,0,0.5),
+      inset 0 1px 2px rgba(255,255,255,0.3),
+      inset 0 -1px 2px rgba(0,0,0,0.3),
+      0 0 12px rgba(201,168,76,0.15);
+  }
+  50% {
+    box-shadow:
+      0 2px 8px rgba(0,0,0,0.5),
+      inset 0 1px 2px rgba(255,255,255,0.3),
+      inset 0 -1px 2px rgba(0,0,0,0.3),
+      0 0 30px rgba(201,168,76,0.45),
+      0 0 60px rgba(201,168,76,0.15);
+  }
+}
+
+/* Nav button click feedback */
+.nav-btn.sparkle {
+  box-shadow: 0 0 20px rgba(201,168,76,0.5), 0 0 40px rgba(201,168,76,0.2);
+}
+
 /* Swipe hint for mobile */
 .swipe-hint {
   display: none;
@@ -927,6 +980,9 @@ body {
 <body>
 
 <div id="app">
+
+<!-- Glitter overlay -->
+<div class="glitter-container" id="glitterContainer"></div>
 
 <!-- Hogsmeade Background Scene -->
 <div class="hogsmeade-bg">
@@ -1203,7 +1259,7 @@ body {
   @touchend="onTouchEnd">
 
   <!-- Closed Book -->
-  <div class="book-closed" :class="{ hidden: bookIsOpen }" @click="openBook">
+  <div class="book-closed" :class="{ hidden: bookIsOpen }" @click="openBookWithGlitter($event)">
     <div class="book-cover">
       <div class="cover-border"></div>
       <div class="corner-ornament tl"></div>
@@ -1242,7 +1298,7 @@ body {
               <h4>{{ tocTitle(cat) }}</h4>
               <div v-for="idx in cat.count" :key="idx"
                    class="toc-entry"
-                   @click="goToCard(cat.startIdx + idx - 1)">
+                   @click="goToCardGlitter($event, cat.startIdx + idx - 1)">
                 {{ cards[cat.startIdx + idx - 1].name }}
               </div>
             </div>
@@ -1338,9 +1394,9 @@ body {
     <!-- Navigation -->
     <div class="book-nav">
       <div class="nav-progress" :style="{ width: progressWidth }"></div>
-      <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPage">&larr;</button>
+      <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPageGlitter($event)">&larr;</button>
       <span class="page-indicator">{{ currentSpread + 1 }} / {{ spreads.length }}</span>
-      <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPage">&rarr;</button>
+      <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter($event)">&rarr;</button>
       <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
     </div>
   </div>
@@ -1644,6 +1700,59 @@ new Vue({
       this.$set(this.imgLoaded, key, true);
     },
 
+    // Glitter burst at a point
+    spawnGlitter: function (x, y, count, spread) {
+      var container = document.getElementById('glitterContainer');
+      var colors = ['#c9a84c', '#e8d48b', '#fff6d5', '#8a6d2b', '#ffe09a'];
+      count = count || 18;
+      spread = spread || 80;
+      for (var i = 0; i < count; i++) {
+        var particle = document.createElement('div');
+        particle.className = 'glitter-particle';
+        var size = Math.random() * 5 + 2;
+        var angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.8;
+        var dist = Math.random() * spread + 20;
+        var gx = Math.cos(angle) * dist;
+        var gy = Math.sin(angle) * dist;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.boxShadow = '0 0 ' + (size + 2) + 'px ' + particle.style.background;
+        particle.style.setProperty('--gx', gx + 'px');
+        particle.style.setProperty('--gy', gy + 'px');
+        particle.style.animationDuration = (Math.random() * 0.5 + 0.5) + 's';
+        container.appendChild(particle);
+        (function (p) {
+          setTimeout(function () { p.remove(); }, 1000);
+        })(particle);
+      }
+    },
+
+    openBookWithGlitter: function (e) {
+      this.spawnGlitter(e.clientX, e.clientY, 30, 120);
+      this.openBook();
+    },
+
+    prevPageGlitter: function (e) {
+      if (this.currentSpread > 0) {
+        this.spawnGlitter(e.clientX, e.clientY, 12, 50);
+        this.prevPage();
+      }
+    },
+
+    nextPageGlitter: function (e) {
+      if (this.currentSpread < this.spreads.length - 1) {
+        this.spawnGlitter(e.clientX, e.clientY, 12, 50);
+        this.nextPage();
+      }
+    },
+
+    goToCardGlitter: function (e, cardIndex) {
+      this.spawnGlitter(e.clientX, e.clientY, 15, 60);
+      this.goToCard(cardIndex);
+    }
   },
 
   mounted: function () {
