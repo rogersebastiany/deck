@@ -39,6 +39,7 @@ body {
   align-items: center;
 }
 
+
 /* ===== AMBIENT PARTICLES ===== */
 .particles {
   position: fixed;
@@ -359,6 +360,7 @@ body {
 /* ===== OPEN BOOK ===== */
 .book-open {
   position: relative;
+  margin: 0 auto;
   width: 1100px;
   height: 700px;
   transform-style: preserve-3d;
@@ -447,6 +449,14 @@ body {
   flex-direction: column;
   position: relative;
   z-index: 1;
+  overflow: hidden;
+}
+
+/* Page inner wrapper for transitions */
+.page-inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Left page: card info */
@@ -553,10 +563,34 @@ body {
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.5s ease;
 }
 .card-image-container img:hover {
   transform: scale(1.03);
+}
+
+/* Lazy image loading */
+.lazy-img {
+  opacity: 0;
+}
+.lazy-img.loaded {
+  opacity: 1;
+}
+.img-shimmer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 70%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--paper-dark) 25%, var(--paper) 50%, var(--paper-dark) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* Navigation */
@@ -594,6 +628,9 @@ body {
   opacity: 0.3;
   cursor: default;
 }
+.nav-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
 .page-indicator {
   font-family: 'Cinzel', serif;
   font-size: 0.8rem;
@@ -601,6 +638,17 @@ body {
   letter-spacing: 2px;
   min-width: 80px;
   text-align: center;
+}
+
+/* Progress bar */
+.nav-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+  transition: width 0.4s ease;
+  border-radius: 1px;
 }
 
 /* Page number on pages */
@@ -611,6 +659,7 @@ body {
   font-size: 0.7rem;
   color: var(--ink-light);
   opacity: 0.4;
+  z-index: 2;
 }
 .page-left .page-number { left: 25px; }
 .page-right .page-number { right: 25px; }
@@ -653,13 +702,20 @@ body {
   margin-top: 15px;
 }
 
-/* Page flip animation */
-.page-flip-enter {
+/* Vue page flip transitions */
+.page-flip-enter-active {
   animation: pageIn 0.4s ease-out;
+}
+.page-flip-leave-active {
+  animation: pageOut 0.25s ease-in;
 }
 @keyframes pageIn {
   from { opacity: 0; transform: rotateY(-5deg); }
   to { opacity: 1; transform: rotateY(0); }
+}
+@keyframes pageOut {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateX(-8px); }
 }
 
 /* ===== FOOTER ===== */
@@ -767,6 +823,27 @@ body {
   color: var(--gold-dark);
 }
 
+/* Swipe hint for mobile */
+.swipe-hint {
+  display: none;
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--gold);
+  opacity: 0;
+  font-size: 0.8rem;
+  text-align: center;
+  transition: opacity 0.4s ease;
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.swipe-hint.show {
+  opacity: 0.6;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1150px) {
   .book-scene { height: 680px; }
@@ -776,8 +853,12 @@ body {
   .card-title { font-size: 1.1rem; }
 }
 @media (max-width: 640px) {
-  .book-scene { height: 800px; }
-  .book-open { width: 95vw; height: 750px; flex-direction: column; }
+  .book-scene { height: auto; min-height: 700px; padding-bottom: 0; }
+  .book-open {
+    width: 95vw;
+    height: 650px;
+    flex-direction: column;
+  }
   .page-left, .page-right {
     width: calc(100% - 30px);
     height: calc(50% - 22px);
@@ -795,10 +876,37 @@ body {
   }
   .book-closed { width: 280px; height: 400px; }
   .cover-title h2 { font-size: 1.1rem; }
+
+  /* Fixed bottom nav on mobile */
+  .book-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    background: linear-gradient(180deg, rgba(42,24,16,0.95), var(--leather-dark));
+    padding: 10px 24px 14px;
+    border-top: 1px solid rgba(201,168,76,0.3);
+    z-index: 100;
+    justify-content: space-between;
+    gap: 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .book-nav .nav-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+  .swipe-hint { display: block; }
+
+  .footer { padding-bottom: 80px; }
 }
 </style>
 </head>
 <body>
+
+<div id="app">
 
 <!-- Floating particles -->
 <div class="particles" id="particles"></div>
@@ -815,10 +923,12 @@ body {
 </header>
 
 <!-- Book Scene -->
-<section class="book-scene">
+<section class="book-scene"
+  @touchstart="onTouchStart"
+  @touchend="onTouchEnd">
 
   <!-- Closed Book -->
-  <div class="book-closed" id="bookClosed" onclick="openBook()">
+  <div class="book-closed" :class="{ hidden: bookIsOpen }" @click="openBook">
     <div class="book-cover">
       <div class="cover-border"></div>
       <div class="corner-ornament tl"></div>
@@ -840,21 +950,125 @@ body {
   </div>
 
   <!-- Open Book -->
-  <div class="book-open" id="bookOpen">
+  <div class="book-open" :class="{ visible: bookIsOpen }">
     <div class="book-base"></div>
     <div class="book-spine"></div>
-    <div class="page-left" id="pageLeft">
-      <div class="page-content" id="pageLeftContent"></div>
-      <span class="page-number" id="pageNumLeft"></span>
+
+    <!-- Left Page -->
+    <div class="page-left">
+      <div class="page-content">
+        <transition name="page-flip" mode="out-in">
+
+          <!-- TOC Left -->
+          <div v-if="spread.type === 'toc'" key="toc-left" class="page-inner">
+            <div class="toc-title">Table of Contents</div>
+            <div class="toc-divider"></div>
+            <div v-for="(cat, ci) in categories" :key="ci" class="toc-section">
+              <h4>{{ tocTitle(cat) }}</h4>
+              <div v-for="idx in cat.count" :key="idx"
+                   class="toc-entry"
+                   @click="goToCard(cat.startIdx + idx - 1)">
+                {{ cards[cat.startIdx + idx - 1].name }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Left -->
+          <div v-else-if="spread.type === 'category'" :key="'cat-l-' + spread.catIndex" class="page-inner">
+            <div class="category-page">
+              <h2 v-html="catTitleHtml(spread.catIndex)"></h2>
+              <div class="cat-divider"></div>
+              <p>{{ categories[spread.catIndex].desc }}</p>
+              <div class="card-count">
+                {{ categories[spread.catIndex].count }}
+                card{{ categories[spread.catIndex].count > 1 ? 's' : '' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Left -->
+          <div v-else :key="'card-l-' + spread.cardIndex"
+               :class="['page-inner', { 'golden-card': currentCard && currentCard.golden }]">
+            <div class="card-category">{{ currentCard.category }}</div>
+            <div class="card-title">{{ currentCard.name }}</div>
+            <div class="card-type-badge">{{ currentCard.type }}</div>
+            <div class="stats-grid">
+              <div v-if="currentCard.attribute !== '\u2014'" class="stat-item">
+                <div class="stat-label">Attribute</div>
+                <div class="stat-value">{{ currentCard.attribute }}</div>
+              </div>
+              <div v-if="currentCard.level !== '\u2014'" class="stat-item">
+                <div class="stat-label">Level</div>
+                <div class="stat-value">{{ currentCard.level }}</div>
+              </div>
+              <div v-if="currentCard.monsterType" class="stat-item">
+                <div class="stat-label">Type</div>
+                <div class="stat-value">{{ currentCard.monsterType }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">ATK</div>
+                <div class="stat-value">{{ currentCard.atk }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">DEF</div>
+                <div class="stat-value">{{ currentCard.def }}</div>
+              </div>
+            </div>
+            <div class="card-text-section">
+              <div class="card-effect">{{ currentCard.effect }}</div>
+              <div class="card-artwork-desc"><strong>Artwork</strong>{{ currentCard.artwork }}</div>
+            </div>
+          </div>
+
+        </transition>
+      </div>
+      <span class="page-number">{{ leftPageNum }}</span>
     </div>
-    <div class="page-right" id="pageRight">
-      <div class="page-content" id="pageRightContent"></div>
-      <span class="page-number" id="pageNumRight"></span>
+
+    <!-- Right Page -->
+    <div class="page-right">
+      <div class="page-content">
+        <transition name="page-flip" mode="out-in">
+
+          <!-- TOC Right -->
+          <div v-if="spread.type === 'toc'" key="toc-right" class="card-image-container">
+            <div v-show="!imgLoaded['toc']" class="img-shimmer"></div>
+            <img v-lazy="'../summon computer sciencepng.png'"
+                 data-lazy-key="toc"
+                 alt="Computer Scientist Summon"
+                 decoding="async">
+          </div>
+
+          <!-- Category Right -->
+          <div v-else-if="spread.type === 'category'" :key="'cat-r-' + spread.catIndex" class="page-inner">
+            <div class="category-page">
+              <div style="font-size:4rem;opacity:0.15;color:var(--gold-dark);font-family:'Cinzel Decorative',serif;">
+                {{ catSymbol(spread.catIndex) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Right -->
+          <div v-else :key="'card-r-' + spread.cardIndex" class="card-image-container">
+            <div v-show="!imgLoaded['card-' + spread.cardIndex]" class="img-shimmer"></div>
+            <img v-lazy="currentCard.image"
+                 :data-lazy-key="'card-' + spread.cardIndex"
+                 :alt="currentCard.name"
+                 decoding="async">
+          </div>
+
+        </transition>
+      </div>
+      <span class="page-number">{{ rightPageNum }}</span>
     </div>
+
+    <!-- Navigation -->
     <div class="book-nav">
-      <button class="nav-btn" id="prevBtn" onclick="prevPage()">&larr;</button>
-      <span class="page-indicator" id="pageIndicator"></span>
-      <button class="nav-btn" id="nextBtn" onclick="nextPage()">&rarr;</button>
+      <div class="nav-progress" :style="{ width: progressWidth }"></div>
+      <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPage">&larr;</button>
+      <span class="page-indicator">{{ currentSpread + 1 }} / {{ spreads.length }}</span>
+      <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPage">&rarr;</button>
+      <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
     </div>
   </div>
 
@@ -871,261 +1085,327 @@ body {
   <p class="footer-copy">&copy; 2026 &bull; Roger Sebastiany</p>
 </footer>
 
+</div><!-- /#app -->
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.min.js"></script>
 <script>
-// ===== CARD DATA =====
-const cards = [
-  // -- Programming Language Monsters --
-  { category: "Programming Language Monster", name: "Python, the Script-Snake", type: "Effect Monster", attribute: "WIND", level: 7, monsterType: "Reptile", atk: 1800, def: 1200, code: "CD001", image: "../pytohn.png",
-    effect: "Once per turn, you can target 1 face-up monster your opponent controls; that target cannot declare an attack until the end of your opponent's next turn.",
-    artwork: "A glowing green digital serpent coiled in a matrix of code, with the Python logo visible. Background filled with JavaScript and Python code snippets." },
-  { category: "Programming Language Monster", name: "Java, the Robust Guardian", type: "Continuous Effect Monster", attribute: "EARTH", level: 6, monsterType: "Warrior", atk: 2100, def: 2400, code: "CD001", image: "../java.png",
-    effect: "This card gains 300 ATK for each \"JVM Token\" you control. If this face-up card is destroyed by an opponent's card effect and sent to the GY: You can Special Summon 1 \"JVM Token\" (Warrior/EARTH/Level 1/ATK 0/DEF 0) in Defense Position.",
-    artwork: "A heavily armored golden-bronze warrior with a glowing blue orb in his chest plate, holding a massive shield. Code streams in the background." },
-  { category: "Programming Language Monster", name: "Kotlin, the Concise Warrior", type: "Effect Monster", attribute: "WIND", level: 5, monsterType: "Warrior", atk: 1900, def: 1000, code: "CD001", image: "../kotlin.png",
-    effect: "If you control a face-up \"Java, the Robust Guardian\", you can Special Summon this card from your hand. You can pay 1000 Life Points; this card can attack your opponent directly this turn.",
-    artwork: "A sleek, blue-and-white armored warrior with a flowing blue cape, dual-wielding short blades. Surrounded by streaming code in a dynamic action pose." },
-  { category: "Programming Language Monster", name: "C++, the Shadow Architect", type: "Effect Monster", attribute: "DARK", level: 6, monsterType: "Spellcaster", atk: 2300, def: 1900, code: "CD001", image: "../vpp.png",
-    effect: "Target 1 face-up monster on the field; this card's Type and Attribute become the same as that target. If that target is destroyed, destroy this card.",
-    artwork: "A dark-cloaked sorcerer figure holding a glowing staff with lightning-bolt shaped tip. Multiple cursor pointers (0x00FF) float around him. Blueprint-style diagrams in background." },
-  { category: "Programming Language Monster", name: "Lisp, the Macro-Rendas Wizard", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Spellcaster", atk: 2500, def: 2000, code: "CD001", image: "../lisp.png",
-    effect: "Once per turn, you can pay 500 Life Points to choose 1 Spell Card from your Deck and place it on top of your Deck.",
-    artwork: "An ancient wizard with a long white beard, wearing elaborate blue robes with Celtic knot patterns. He holds a staff and conjures a glowing orb displaying \"(DEFINE MACRO (FOO ...))\"." },
-  { category: "Programming Language Monster", name: "Haskell, the Functional Alchemist", type: "Continuous Effect Monster", attribute: "WIND", level: 6, monsterType: "Spellcaster", atk: 2600, def: 2200, code: "CD001", image: "../haskell.png",
-    effect: "This card cannot be destroyed by card effects that do not target specifically a \"Functional Alchemist\" type monster. Once per turn, you can banish the top card of your Deck; if it is a Monster Card, add it to your hand.",
-    artwork: "A bald, bespectacled alchemist in teal/green robes holding glowing crystal cards marked \"A\u2192B\". Crystalline laboratory environment with geometric patterns." },
-  { category: "Programming Language Monster", name: "SQL, the Data Devourer", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 2800, def: 2400, code: "CD001", image: "../sql.png",
-    effect: "When this card is Summoned: You can target up to 2 cards in your opponent's Spell & Trap Zone; send them to the GY. This card cannot attack during the turn you activate this effect.",
-    artwork: "A massive armored machine-humanoid with SQL command plates embedded in its body: \"SELECT\", \"WHERE\", \"DELETE FROM\", \"JOIN\", \"INDEX\". Glowing blue core in chest." },
-
-  // -- Trap Cards - Philosophy & Mathematics --
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Computer Scientist Summon", type: "Trap Card", attribute: "\u2014", level: "\u2014", atk: 0, def: 0, code: "CD001", image: "../summon computer sciencepng.png",
-    effect: "Trap Card: Activate when you need a computer scientist to 10x code your project while automating it as well.",
-    artwork: "A shirtless man with sunglasses, headphones, and a beard making a hand gesture. Surrounded by holographic screens showing Python, JavaScript, and other code. Background full of binary code and floating monitors." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "The Law of Excluded Middle", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap incognita.png",
-    effect: "Activate when your opponent activates a card or effect that would create a new choice. If your choice (HEADS or TAILS) is correct, negate that effect and destroy that card.",
-    artwork: "A balance scale with \"1 TRUE\" on the left side and \"0 FALSE\" on the right side. The FALSE side is crashing down, shattering the ground. Red background with logical symbols." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Russell's Paradox", type: "Continuous Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../cont trap paradoxo.png",
-    effect: "When your opponent activates a card effect that targets a monster that opponent controls, negate that effect and destroy all face-up monsters with that same name on the field.",
-    artwork: "An elderly philosopher holding a sign reading \"The set of all sets that do not contain themselves.\" Swirling red vortex with text \"Must contain itself\" repeating in a loop." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Orthogonal Projection", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: 0, def: 0, code: "CD001", image: "../projecao ortogonal anula o atak.png",
-    effect: "Activate when an opponent's monster declares an attack. Change that monster's ATK to 0, and if you do, that monster cannot use its effects this turn.",
-    artwork: "A red geometric projection space with mathematical formulas: P = A(A^T A)^{-1} A^T. A large red \"X\" mark is projected onto a grid plane. Linear algebra projection diagrams." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Empty Intersection", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap interseccao.png",
-    effect: "Activate when your opponent Special Summons a monster(s). Until the end of your opponent's next turn, your opponent cannot Special Summon monsters with the same Type or Attribute as that Summoned monster(s).",
-    artwork: "Two overlapping Venn diagram circles \u2014 one blue and one red \u2014 with an empty set symbol (\u2205) in the intersection. \"A\u2229B=\u2205\" displayed in all four corners." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Kant's Categorical Imperative", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap kant.png",
-    effect: "Activate when your opponent activates a card or effect that has already been activated during this turn. Negate that effect, and if you do, destroy that card.",
-    artwork: "A statue of Immanuel Kant in classical robes, chained by glowing red chains. Digital overlay showing: \"MAXIM \u2192 UNIVERSALIZABILITY\", \"DUTY\", \"NON-CONTRADICTION\"." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "I Think, Therefore I Am", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap descartes complicada essa.png",
-    effect: "Activate when your opponent destroys the last monster you control. Special Summon 1 \"Descartes Token\" (Spellcaster/LIGHT/Level 1/ATK 0/DEF 0). If this Token is destroyed, your opponent gains 2000 Life Points.",
-    artwork: "Descartes meditating cross-legged on a red grid plane. Swirling blue text spirals around him: \"COGITO\", \"SELF-AWARENESS\", \"ERGO\", \"I THINK\". Empty set symbols and \"null\" scattered around." },
-  { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Descartes' Conscious Summon", type: "Trap Card", attribute: "\u2014", level: 10, monsterType: "Spellcaster", atk: 3000, def: 2500, code: "CD001", image: "../descartes v3.png",
-    effect: "Must be Special Summoned by the effect of \"I Think, Therefore I Am\". Cannot be destroyed by battle or card effects. Your opponent cannot activate card effects in response to this card's effects. Once per turn: You can inflict 1000 damage to your opponent.",
-    artwork: "An ascended version of Descartes, now standing with arms raised, radiating power. Red energy aura. Multiple glowing \u2205 symbols. The philosopher has achieved full consciousness." },
-
-  // -- Descartes Monster --
-  { category: "Descartes Monster", name: "Descartes, the Existential Sorcerer", type: "Effect Monster", attribute: "LIGHT", level: 6, monsterType: "Spellcaster", atk: 2400, def: 2000, code: "CD001", image: "../descartes v2.png",
-    effect: "This card can be Special Summoned by your effect that names a \"Descartes Token\". Once per turn, you can pay 1000 Life Points to negate a Spell or Trap card activated by your opponent.",
-    artwork: "Same Descartes meditating figure, but now framed as a golden-bordered monster card. Swirling \"COGITO\", \"SELF-AWARENESS\" text. Empty set symbols and \"null\" values surround him." },
-
-  // -- AWS Cloud Monsters --
-  { category: "AWS Cloud Monster", name: "IAM Rule Executioner", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstro iam.png",
-    effect: "Once per turn: you can pay 1000 LP; target 1 face-up monster on the field. That target's effects are negated until the end of this turn. At the end of the damage step, if this card battled an opponent's monster: banish that monster.",
-    artwork: "A dark, menacing armored executioner figure with twin circular saw blades in each hand. Cards and documents scatter around it. Red glowing background with mechanical details." },
-  { category: "AWS Cloud Monster", name: "Cognito, HTTPSV2/GRPC Identity Guardian", type: "Effect Monster", attribute: "LIGHT", level: 6, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstro cognito.png",
-    effect: "While this face-up card is on the field, your opponent cannot activate the effects of monsters Summoned from the Extra Deck. Once per turn: you can pay 1000 LP; negate the activation of 1 Spell/Trap card. This card is unaffected by other Machine-type monster effects.",
-    artwork: "A sleek blue-and-white robotic guardian holding a \"Token\" bubble shield and a lock-emblem shield. \"gRPC\" label overhead. AWS Cognito lock symbol on its chest plate." },
-  { category: "AWS Cloud Monster", name: "EKS Kubernetes Orchestrator", type: "Effect Monster", attribute: "LIGHT", level: 8, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstor eks.png",
-    effect: "Once per turn, if a \"Pod\" monster you control is destroyed by battle: you can Special Summon 1 \"Pod Token\" (Machine/LIGHT/Level 1/ATK 0/DEF 0). This card gains 500 ATK for each \"Pod Token\" on the field.",
-    artwork: "A massive robotic orchestrator with the Kubernetes logo on its chest. Surrounded by floating green cube \"pods\" and holographic deployment screens. \"kubectl\" interface visible." },
-  { category: "AWS Cloud Monster", name: "AWS ELB Load Balancer", type: "Effect Monster", attribute: "LIGHT", level: 7, monsterType: "Machine", atk: 2500, def: 3000, code: "CD001", image: "../monstro elb.png",
-    effect: "While this face-up card is on the field, load distribution targets across the IT traffic. This card gains 500 ATK for each \"Pod Token\".",
-    artwork: "A cybernetic octopus-like machine with a central blue glowing eye and multiple mechanical tentacles extending outward, distributing energy streams. Green and red data flows radiate from its core." },
-  { category: "AWS Cloud Monster", name: "API Gateway Gatekeeper", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 2400, def: 2500, code: "CD001", image: "../monstro api gateway.png",
-    effect: "While this face-up card is on the field, once per turn, if a \"Traffic Packet\" is filtered \u2014 physically stopping unauthorized data, spectral data instantly forwarding approved packets to another as 1 \"Backend module.\"",
-    artwork: "A massive mechanical gateway structure with the API logo at its center \u2014 a blue orb surrounded by interlocking red mechanical arms. Data streams flow through and around it." },
-  { category: "AWS Cloud Monster", name: "Cloudfront Edge-Specter", type: "Effect Monster", attribute: "LIGHT", level: 7, monsterType: "Cyber", atk: 2400, def: 2100, code: "CD001", image: "../monstro cloudfront.png",
-    effect: "While this card is on the field, all \"AWS\" monsters you control can declare an attack during the same turn they are Summoned. If this card is destroyed: you can add 1 \"Edge Token\" from your deck or GY to your hand.",
-    artwork: "A ghostly, luminescent humanoid figure made of pure blue energy, running at high speed across a red grid. Surrounded by floating CDN node icons. The embodiment of edge computing." },
-  { category: "AWS Cloud Monster", name: "S3 Sentinel of the Infinite", type: "Effect Monster", attribute: "EARTH", level: 8, monsterType: "Machine", atk: 2800, def: 3500, code: "CD001", image: "../monstro s3.png",
-    effect: "This card cannot be destroyed by card effects. Once per turn: you can target 1 \"Policy\" or \"Statement\" card in your GY or banished; protect it from removal until end of next turn. This card gains 500 ATK for each card under its protection.",
-    artwork: "A colossal stone-and-metal golem with the S3 bucket icon embedded in its chest core. Massive arms with hexagonal armored segments. An immovable guardian of stored data." },
-  { category: "AWS Cloud Monster", name: "AWS Lambda, Serverless Phantom", type: "Effect Monster", attribute: "WIND", level: 5, monsterType: "Machine", atk: 2200, def: 1800, code: "CD001", image: "../monstro lambdinha.png",
-    effect: "While this face-up card is on the field, event-driven triggers activate connected modules. Triggered by JWT payload connections. This card gains 500 ATK for \"Pod Token\" payloads.",
-    artwork: "A ghostly, ethereal humanoid figure with the Lambda (\u03bb) symbol glowing on its chest. Tentacle-like connections reach out to surrounding service icons. Exists everywhere and nowhere." },
-
-  // -- Golden Boss Cards --
-  { category: "Golden Boss Card", name: "Route 53 DNS Hydra", type: "Effect Monster", attribute: "WATER", level: 9, monsterType: "Machine", atk: 3000, def: 3500, code: "CD001", image: "../golden route 53 dns hydra.png", golden: true,
-    effect: "Cannot be Normal Summoned/Set. Must first be Special Summoned by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card; until end of turn, this card cannot be destroyed, and you can switch the Battle Position of 1 face-up monster.",
-    artwork: "A magnificent golden three-headed hydra dragon with ornate armor plating and a glowing blue cross symbol on its central head. Radiant golden light emanates from behind. Golden premium rare border." },
-  { category: "Golden Boss Card", name: "RDS Aurora Leviathan", type: "Effect Monster", attribute: "WATER", level: 10, monsterType: "Machine", atk: 4000, def: 3500, code: "CD001", image: "../golden rds aurora leviathan.png", golden: true,
-    effect: "Cannot be Normal Summoned/Set. Must first be Special Summoned by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card; until end of turn, this card cannot be destroyed, and you can change the Battle Position of 1 face-up monster.",
-    artwork: "A towering golden-armored divine figure with an ornate crown and flowing ethereal energy. Blue crystalline energy radiates from its core. The ultimate database guardian \u2014 Aurora's relational power made manifest." },
-  { category: "Golden Boss Card", name: "Ontological Tautology", type: "Counter Trap", attribute: "\u2014", level: 12, atk: "\u221e", def: "\u221e", code: "CD001", image: "../Xgolden Ontological Tautology.png", golden: true,
-    effect: "Cannot be negated. This card cannot be destroyed. Activate when your opponent activates a card or effect. Negate that effect. Your opponent cannot activate cards or effects in response. While on the field, your \"AWS\" and \"Cloud\" monsters cannot be banished, returned, or destroyed. Your opponent cannot change the field or hand size.",
-    artwork: "A golden divine figure standing before a glowing altar inscribed with \"A is A\" and \"EXISTS BECAUSE IT EXISTS\". The card radiates pure golden light. \"A=A\" formula displayed prominently. The ultimate tautological truth." },
-];
-
-// ===== CATEGORY SECTIONS =====
-const categories = [
-  { title: "Programming Language Monsters", desc: "Seven digital entities forged from the languages of creation \u2014 each wielding the power of the code they embody.", count: 7, startIdx: 0 },
-  { title: "Trap Cards\nPhilosophy & Mathematics", desc: "Eight counter-spells drawn from the deepest wells of logic, ethics, and existential thought.", count: 8, startIdx: 7 },
-  { title: "Descartes Monster", desc: "The Existential Sorcerer \u2014 born from doubt, empowered by consciousness.", count: 1, startIdx: 15 },
-  { title: "AWS Cloud Monsters", desc: "Eight machine-type guardians of the cloud infrastructure \u2014 services made sentient.", count: 8, startIdx: 16 },
-  { title: "Golden Boss Cards", desc: "The three supreme entities. Rare. Powerful. Nearly unstoppable.", count: 3, startIdx: 24 },
-];
-
-// Build page spreads: [{ leftHTML, rightHTML }]
-const spreads = [];
-
-// Spread 0: Table of Contents + Cover card image
-(function buildTOC() {
-  let leftHTML = `<div class="toc-title">Table of Contents</div><div class="toc-divider"></div>`;
-  categories.forEach((cat, ci) => {
-    leftHTML += `<div class="toc-section"><h4>${cat.title.replace('\n',' \u2014 ')}</h4>`;
-    for (let i = cat.startIdx; i < cat.startIdx + cat.count; i++) {
-      leftHTML += `<div class="toc-entry" onclick="goToCard(${i})">${cards[i].name}</div>`;
+// ===== LAZY IMAGE DIRECTIVE =====
+Vue.directive('lazy', {
+  bind: function (el) {
+    el.classList.add('lazy-img');
+    el.setAttribute('loading', 'lazy');
+  },
+  inserted: function (el, binding) {
+    function loadImage() {
+      el.src = binding.value;
+      el.onload = function () {
+        el.classList.add('loaded');
+        // Notify Vue instance
+        var key = el.getAttribute('data-lazy-key');
+        if (key && el.__vue_app__) {
+          el.__vue_app__.$set(el.__vue_app__.imgLoaded, key, true);
+        }
+        // Also dispatch a custom event the app can listen for
+        el.dispatchEvent(new CustomEvent('lazy-loaded', { detail: key }));
+      };
+      el.onerror = function () {
+        el.classList.add('loaded');
+      };
     }
-    leftHTML += `</div>`;
-  });
-  let rightHTML = `<div class="card-image-container"><img src="../summon computer sciencepng.png" alt="Computer Scientist Summon" loading="lazy"></div>`;
-  spreads.push({ leftHTML, rightHTML });
-})();
 
-// Build card spreads
-let currentCatIdx = 0;
-let nextCatStart = categories[0].startIdx;
-
-cards.forEach((card, i) => {
-  // Check if we need a category divider
-  if (currentCatIdx < categories.length && i === categories[currentCatIdx].startIdx) {
-    const cat = categories[currentCatIdx];
-    // Category divider spread
-    const divLeft = `<div class="category-page">
-      <h2>${cat.title.replace('\n','<br>')}</h2>
-      <div class="cat-divider"></div>
-      <p>${cat.desc}</p>
-      <div class="card-count">${cat.count} card${cat.count > 1 ? 's' : ''}</div>
-    </div>`;
-    const divRight = `<div class="category-page">
-      <div style="font-size:4rem;opacity:0.15;color:var(--gold-dark);font-family:'Cinzel Decorative',serif;">${currentCatIdx === 4 ? '\u2605' : currentCatIdx === 0 ? '\u2694' : currentCatIdx === 3 ? '\u2601' : '\u2736'}</div>
-    </div>`;
-    spreads.push({ leftHTML: divLeft, rightHTML: divRight });
-    currentCatIdx++;
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            loadImage();
+            observer.unobserve(el);
+          }
+        });
+      }, { rootMargin: '200px' });
+      observer.observe(el);
+    } else {
+      loadImage();
+    }
+  },
+  update: function (el, binding) {
+    if (binding.value !== binding.oldValue) {
+      el.classList.remove('loaded');
+      el.src = binding.value;
+      el.onload = function () { el.classList.add('loaded'); };
+    }
   }
-
-  // Card spread
-  const isGolden = card.golden ? ' golden-card' : '';
-  const statsHTML = `
-    <div class="stats-grid">
-      ${card.attribute !== '\u2014' ? `<div class="stat-item"><div class="stat-label">Attribute</div><div class="stat-value">${card.attribute}</div></div>` : ''}
-      ${card.level !== '\u2014' ? `<div class="stat-item"><div class="stat-label">Level</div><div class="stat-value">${card.level}</div></div>` : ''}
-      ${card.monsterType ? `<div class="stat-item"><div class="stat-label">Type</div><div class="stat-value">${card.monsterType}</div></div>` : ''}
-      <div class="stat-item"><div class="stat-label">ATK</div><div class="stat-value">${card.atk}</div></div>
-      <div class="stat-item"><div class="stat-label">DEF</div><div class="stat-value">${card.def}</div></div>
-    </div>`;
-
-  const leftHTML = `<div class="page-content${isGolden}">
-    <div class="card-category">${card.category}</div>
-    <div class="card-title">${card.name}</div>
-    <div class="card-type-badge">${card.type}</div>
-    ${statsHTML}
-    <div class="card-text-section">
-      <div class="card-effect">${card.effect}</div>
-      <div class="card-artwork-desc"><strong>Artwork</strong>${card.artwork}</div>
-    </div>
-  </div>`;
-
-  const rightHTML = `<div class="card-image-container"><img src="${card.image}" alt="${card.name}" loading="lazy"></div>`;
-  spreads.push({ leftHTML, rightHTML });
 });
 
-// ===== STATE =====
-let currentSpread = 0;
-let bookIsOpen = false;
+// ===== VUE APP =====
+new Vue({
+  el: '#app',
 
-// ===== FUNCTIONS =====
-function openBook() {
-  if (bookIsOpen) return;
-  bookIsOpen = true;
-  document.getElementById('bookClosed').classList.add('hidden');
-  setTimeout(() => {
-    document.getElementById('bookOpen').classList.add('visible');
-    renderSpread(0);
-  }, 400);
-}
+  data: {
+    bookIsOpen: false,
+    currentSpread: 0,
+    touchStartX: 0,
+    touchStartY: 0,
+    showSwipeHint: false,
+    imgLoaded: {},
 
-function renderSpread(idx) {
-  currentSpread = idx;
-  const spread = spreads[idx];
-  const leftContent = document.getElementById('pageLeftContent');
-  const rightContent = document.getElementById('pageRightContent');
+    // Card data
+    cards: [
+      // -- Programming Language Monsters --
+      { category: "Programming Language Monster", name: "Python, the Script-Snake", type: "Effect Monster", attribute: "WIND", level: 7, monsterType: "Reptile", atk: 1800, def: 1200, code: "CD001", image: "../pytohn.png",
+        effect: "Once per turn, you can target 1 face-up monster your opponent controls; that target cannot declare an attack until the end of your opponent\u2019s next turn.",
+        artwork: "A glowing green digital serpent coiled in a matrix of code, with the Python logo visible. Background filled with JavaScript and Python code snippets." },
+      { category: "Programming Language Monster", name: "Java, the Robust Guardian", type: "Continuous Effect Monster", attribute: "EARTH", level: 6, monsterType: "Warrior", atk: 2100, def: 2400, code: "CD001", image: "../java.png",
+        effect: "This card gains 300 ATK for each \"JVM Token\" you control. If this face-up card is destroyed by an opponent\u2019s card effect and sent to the GY: You can Special Summon 1 \"JVM Token\" (Warrior/EARTH/Level 1/ATK 0/DEF 0) in Defense Position.",
+        artwork: "A heavily armored golden-bronze warrior with a glowing blue orb in his chest plate, holding a massive shield. Code streams in the background." },
+      { category: "Programming Language Monster", name: "Kotlin, the Concise Warrior", type: "Effect Monster", attribute: "WIND", level: 5, monsterType: "Warrior", atk: 1900, def: 1000, code: "CD001", image: "../kotlin.png",
+        effect: "If you control a face-up \"Java, the Robust Guardian\", you can Special Summon this card from your hand. You can pay 1000 Life Points; this card can attack your opponent directly this turn.",
+        artwork: "A sleek, blue-and-white armored warrior with a flowing blue cape, dual-wielding short blades. Surrounded by streaming code in a dynamic action pose." },
+      { category: "Programming Language Monster", name: "C++, the Shadow Architect", type: "Effect Monster", attribute: "DARK", level: 6, monsterType: "Spellcaster", atk: 2300, def: 1900, code: "CD001", image: "../vpp.png",
+        effect: "Target 1 face-up monster on the field; this card\u2019s Type and Attribute become the same as that target. If that target is destroyed, destroy this card.",
+        artwork: "A dark-cloaked sorcerer figure holding a glowing staff with lightning-bolt shaped tip. Multiple cursor pointers (0x00FF) float around him. Blueprint-style diagrams in background." },
+      { category: "Programming Language Monster", name: "Lisp, the Macro-Rendas Wizard", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Spellcaster", atk: 2500, def: 2000, code: "CD001", image: "../lisp.png",
+        effect: "Once per turn, you can pay 500 Life Points to choose 1 Spell Card from your Deck and place it on top of your Deck.",
+        artwork: "An ancient wizard with a long white beard, wearing elaborate blue robes with Celtic knot patterns. He holds a staff and conjures a glowing orb displaying \"(DEFINE MACRO (FOO ...))\"." },
+      { category: "Programming Language Monster", name: "Haskell, the Functional Alchemist", type: "Continuous Effect Monster", attribute: "WIND", level: 6, monsterType: "Spellcaster", atk: 2600, def: 2200, code: "CD001", image: "../haskell.png",
+        effect: "This card cannot be destroyed by card effects that do not target specifically a \"Functional Alchemist\" type monster. Once per turn, you can banish the top card of your Deck; if it is a Monster Card, add it to your hand.",
+        artwork: "A bald, bespectacled alchemist in teal/green robes holding glowing crystal cards marked \"A\u2192B\". Crystalline laboratory environment with geometric patterns." },
+      { category: "Programming Language Monster", name: "SQL, the Data Devourer", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 2800, def: 2400, code: "CD001", image: "../sql.png",
+        effect: "When this card is Summoned: You can target up to 2 cards in your opponent\u2019s Spell & Trap Zone; send them to the GY. This card cannot attack during the turn you activate this effect.",
+        artwork: "A massive armored machine-humanoid with SQL command plates embedded in its body: \"SELECT\", \"WHERE\", \"DELETE FROM\", \"JOIN\", \"INDEX\". Glowing blue core in chest." },
 
-  leftContent.innerHTML = spread.leftHTML;
-  rightContent.innerHTML = spread.rightHTML;
+      // -- Trap Cards - Philosophy & Mathematics --
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Computer Scientist Summon", type: "Trap Card", attribute: "\u2014", level: "\u2014", atk: 0, def: 0, code: "CD001", image: "../summon computer sciencepng.png",
+        effect: "Trap Card: Activate when you need a computer scientist to 10x code your project while automating it as well.",
+        artwork: "A shirtless man with sunglasses, headphones, and a beard making a hand gesture. Surrounded by holographic screens showing Python, JavaScript, and other code. Background full of binary code and floating monitors." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "The Law of Excluded Middle", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap incognita.png",
+        effect: "Activate when your opponent activates a card or effect that would create a new choice. If your choice (HEADS or TAILS) is correct, negate that effect and destroy that card.",
+        artwork: "A balance scale with \"1 TRUE\" on the left side and \"0 FALSE\" on the right side. The FALSE side is crashing down, shattering the ground. Red background with logical symbols." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Russell\u2019s Paradox", type: "Continuous Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../cont trap paradoxo.png",
+        effect: "When your opponent activates a card effect that targets a monster that opponent controls, negate that effect and destroy all face-up monsters with that same name on the field.",
+        artwork: "An elderly philosopher holding a sign reading \"The set of all sets that do not contain themselves.\" Swirling red vortex with text \"Must contain itself\" repeating in a loop." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Orthogonal Projection", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: 0, def: 0, code: "CD001", image: "../projecao ortogonal anula o atak.png",
+        effect: "Activate when an opponent\u2019s monster declares an attack. Change that monster\u2019s ATK to 0, and if you do, that monster cannot use its effects this turn.",
+        artwork: "A red geometric projection space with mathematical formulas: P = A(A^T A)^{-1} A^T. A large red \"X\" mark is projected onto a grid plane. Linear algebra projection diagrams." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Empty Intersection", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap interseccao.png",
+        effect: "Activate when your opponent Special Summons a monster(s). Until the end of your opponent\u2019s next turn, your opponent cannot Special Summon monsters with the same Type or Attribute as that Summoned monster(s).",
+        artwork: "Two overlapping Venn diagram circles \u2014 one blue and one red \u2014 with an empty set symbol (\u2205) in the intersection. \"A\u2229B=\u2205\" displayed in all four corners." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Kant\u2019s Categorical Imperative", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap kant.png",
+        effect: "Activate when your opponent activates a card or effect that has already been activated during this turn. Negate that effect, and if you do, destroy that card.",
+        artwork: "A statue of Immanuel Kant in classical robes, chained by glowing red chains. Digital overlay showing: \"MAXIM \u2192 UNIVERSALIZABILITY\", \"DUTY\", \"NON-CONTRADICTION\"." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "I Think, Therefore I Am", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap descartes complicada essa.png",
+        effect: "Activate when your opponent destroys the last monster you control. Special Summon 1 \"Descartes Token\" (Spellcaster/LIGHT/Level 1/ATK 0/DEF 0). If this Token is destroyed, your opponent gains 2000 Life Points.",
+        artwork: "Descartes meditating cross-legged on a red grid plane. Swirling blue text spirals around him: \"COGITO\", \"SELF-AWARENESS\", \"ERGO\", \"I THINK\". Empty set symbols and \"null\" scattered around." },
+      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Descartes\u2019 Conscious Summon", type: "Trap Card", attribute: "\u2014", level: 10, monsterType: "Spellcaster", atk: 3000, def: 2500, code: "CD001", image: "../descartes v3.png",
+        effect: "Must be Special Summoned by the effect of \"I Think, Therefore I Am\". Cannot be destroyed by battle or card effects. Your opponent cannot activate card effects in response to this card\u2019s effects. Once per turn: You can inflict 1000 damage to your opponent.",
+        artwork: "An ascended version of Descartes, now standing with arms raised, radiating power. Red energy aura. Multiple glowing \u2205 symbols. The philosopher has achieved full consciousness." },
 
-  // Page numbers
-  document.getElementById('pageNumLeft').textContent = idx === 0 ? '' : (idx * 2);
-  document.getElementById('pageNumRight').textContent = idx === 0 ? '' : (idx * 2 + 1);
+      // -- Descartes Monster --
+      { category: "Descartes Monster", name: "Descartes, the Existential Sorcerer", type: "Effect Monster", attribute: "LIGHT", level: 6, monsterType: "Spellcaster", atk: 2400, def: 2000, code: "CD001", image: "../descartes v2.png",
+        effect: "This card can be Special Summoned by your effect that names a \"Descartes Token\". Once per turn, you can pay 1000 Life Points to negate a Spell or Trap card activated by your opponent.",
+        artwork: "Same Descartes meditating figure, but now framed as a golden-bordered monster card. Swirling \"COGITO\", \"SELF-AWARENESS\" text. Empty set symbols and \"null\" values surround him." },
 
-  // Navigation
-  document.getElementById('prevBtn').disabled = idx === 0;
-  document.getElementById('nextBtn').disabled = idx === spreads.length - 1;
-  document.getElementById('pageIndicator').textContent = `${idx + 1} / ${spreads.length}`;
+      // -- AWS Cloud Monsters --
+      { category: "AWS Cloud Monster", name: "IAM Rule Executioner", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstro iam.png",
+        effect: "Once per turn: you can pay 1000 LP; target 1 face-up monster on the field. That target\u2019s effects are negated until the end of this turn. At the end of the damage step, if this card battled an opponent\u2019s monster: banish that monster.",
+        artwork: "A dark, menacing armored executioner figure with twin circular saw blades in each hand. Cards and documents scatter around it. Red glowing background with mechanical details." },
+      { category: "AWS Cloud Monster", name: "Cognito, HTTPSV2/GRPC Identity Guardian", type: "Effect Monster", attribute: "LIGHT", level: 6, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstro cognito.png",
+        effect: "While this face-up card is on the field, your opponent cannot activate the effects of monsters Summoned from the Extra Deck. Once per turn: you can pay 1000 LP; negate the activation of 1 Spell/Trap card. This card is unaffected by other Machine-type monster effects.",
+        artwork: "A sleek blue-and-white robotic guardian holding a \"Token\" bubble shield and a lock-emblem shield. \"gRPC\" label overhead. AWS Cognito lock symbol on its chest plate." },
+      { category: "AWS Cloud Monster", name: "EKS Kubernetes Orchestrator", type: "Effect Monster", attribute: "LIGHT", level: 8, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstor eks.png",
+        effect: "Once per turn, if a \"Pod\" monster you control is destroyed by battle: you can Special Summon 1 \"Pod Token\" (Machine/LIGHT/Level 1/ATK 0/DEF 0). This card gains 500 ATK for each \"Pod Token\" on the field.",
+        artwork: "A massive robotic orchestrator with the Kubernetes logo on its chest. Surrounded by floating green cube \"pods\" and holographic deployment screens. \"kubectl\" interface visible." },
+      { category: "AWS Cloud Monster", name: "AWS ELB Load Balancer", type: "Effect Monster", attribute: "LIGHT", level: 7, monsterType: "Machine", atk: 2500, def: 3000, code: "CD001", image: "../monstro elb.png",
+        effect: "While this face-up card is on the field, load distribution targets across the IT traffic. This card gains 500 ATK for each \"Pod Token\".",
+        artwork: "A cybernetic octopus-like machine with a central blue glowing eye and multiple mechanical tentacles extending outward, distributing energy streams. Green and red data flows radiate from its core." },
+      { category: "AWS Cloud Monster", name: "API Gateway Gatekeeper", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 2400, def: 2500, code: "CD001", image: "../monstro api gateway.png",
+        effect: "While this face-up card is on the field, once per turn, if a \"Traffic Packet\" is filtered \u2014 physically stopping unauthorized data, spectral data instantly forwarding approved packets to another as 1 \"Backend module.\"",
+        artwork: "A massive mechanical gateway structure with the API logo at its center \u2014 a blue orb surrounded by interlocking red mechanical arms. Data streams flow through and around it." },
+      { category: "AWS Cloud Monster", name: "Cloudfront Edge-Specter", type: "Effect Monster", attribute: "LIGHT", level: 7, monsterType: "Cyber", atk: 2400, def: 2100, code: "CD001", image: "../monstro cloudfront.png",
+        effect: "While this card is on the field, all \"AWS\" monsters you control can declare an attack during the same turn they are Summoned. If this card is destroyed: you can add 1 \"Edge Token\" from your deck or GY to your hand.",
+        artwork: "A ghostly, luminescent humanoid figure made of pure blue energy, running at high speed across a red grid. Surrounded by floating CDN node icons. The embodiment of edge computing." },
+      { category: "AWS Cloud Monster", name: "S3 Sentinel of the Infinite", type: "Effect Monster", attribute: "EARTH", level: 8, monsterType: "Machine", atk: 2800, def: 3500, code: "CD001", image: "../monstro s3.png",
+        effect: "This card cannot be destroyed by card effects. Once per turn: you can target 1 \"Policy\" or \"Statement\" card in your GY or banished; protect it from removal until end of next turn. This card gains 500 ATK for each card under its protection.",
+        artwork: "A colossal stone-and-metal golem with the S3 bucket icon embedded in its chest core. Massive arms with hexagonal armored segments. An immovable guardian of stored data." },
+      { category: "AWS Cloud Monster", name: "AWS Lambda, Serverless Phantom", type: "Effect Monster", attribute: "WIND", level: 5, monsterType: "Machine", atk: 2200, def: 1800, code: "CD001", image: "../monstro lambdinha.png",
+        effect: "While this face-up card is on the field, event-driven triggers activate connected modules. Triggered by JWT payload connections. This card gains 500 ATK for \"Pod Token\" payloads.",
+        artwork: "A ghostly, ethereal humanoid figure with the Lambda (\u03bb) symbol glowing on its chest. Tentacle-like connections reach out to surrounding service icons. Exists everywhere and nowhere." },
 
-  // Animation
-  leftContent.classList.remove('page-flip-enter');
-  rightContent.classList.remove('page-flip-enter');
-  void leftContent.offsetWidth;
-  leftContent.classList.add('page-flip-enter');
-  rightContent.classList.add('page-flip-enter');
-}
+      // -- Golden Boss Cards --
+      { category: "Golden Boss Card", name: "Route 53 DNS Hydra", type: "Effect Monster", attribute: "WATER", level: 9, monsterType: "Machine", atk: 3000, def: 3500, code: "CD001", image: "../golden route 53 dns hydra.png", golden: true,
+        effect: "Cannot be Normal Summoned/Set. Must first be Special Summoned by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card; until end of turn, this card cannot be destroyed, and you can switch the Battle Position of 1 face-up monster.",
+        artwork: "A magnificent golden three-headed hydra dragon with ornate armor plating and a glowing blue cross symbol on its central head. Radiant golden light emanates from behind. Golden premium rare border." },
+      { category: "Golden Boss Card", name: "RDS Aurora Leviathan", type: "Effect Monster", attribute: "WATER", level: 10, monsterType: "Machine", atk: 4000, def: 3500, code: "CD001", image: "../golden rds aurora leviathan.png", golden: true,
+        effect: "Cannot be Normal Summoned/Set. Must first be Special Summoned by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card; until end of turn, this card cannot be destroyed, and you can change the Battle Position of 1 face-up monster.",
+        artwork: "A towering golden-armored divine figure with an ornate crown and flowing ethereal energy. Blue crystalline energy radiates from its core. The ultimate database guardian \u2014 Aurora\u2019s relational power made manifest." },
+      { category: "Golden Boss Card", name: "Ontological Tautology", type: "Counter Trap", attribute: "\u2014", level: 12, atk: "\u221e", def: "\u221e", code: "CD001", image: "../Xgolden Ontological Tautology.png", golden: true,
+        effect: "Cannot be negated. This card cannot be destroyed. Activate when your opponent activates a card or effect. Negate that effect. Your opponent cannot activate cards or effects in response. While on the field, your \"AWS\" and \"Cloud\" monsters cannot be banished, returned, or destroyed. Your opponent cannot change the field or hand size.",
+        artwork: "A golden divine figure standing before a glowing altar inscribed with \"A is A\" and \"EXISTS BECAUSE IT EXISTS\". The card radiates pure golden light. \"A=A\" formula displayed prominently. The ultimate tautological truth." },
+    ],
 
-function prevPage() {
-  if (currentSpread > 0) renderSpread(currentSpread - 1);
-}
-function nextPage() {
-  if (currentSpread < spreads.length - 1) renderSpread(currentSpread + 1);
-}
+    categories: [
+      { title: "Programming Language Monsters", desc: "Seven digital entities forged from the languages of creation \u2014 each wielding the power of the code they embody.", count: 7, startIdx: 0 },
+      { title: "Trap Cards\nPhilosophy & Mathematics", desc: "Eight counter-spells drawn from the deepest wells of logic, ethics, and existential thought.", count: 8, startIdx: 7 },
+      { title: "Descartes Monster", desc: "The Existential Sorcerer \u2014 born from doubt, empowered by consciousness.", count: 1, startIdx: 15 },
+      { title: "AWS Cloud Monsters", desc: "Eight machine-type guardians of the cloud infrastructure \u2014 services made sentient.", count: 8, startIdx: 16 },
+      { title: "Golden Boss Cards", desc: "The three supreme entities. Rare. Powerful. Nearly unstoppable.", count: 3, startIdx: 24 },
+    ]
+  },
 
-function goToCard(cardIndex) {
-  // Find which spread this card is on
-  // Spread 0 is TOC. Then category dividers + cards.
-  let spreadIdx = 1; // start after TOC
-  let catIdx = 0;
-  for (let i = 0; i <= cardIndex; i++) {
-    if (catIdx < categories.length && i === categories[catIdx].startIdx) {
-      spreadIdx++; // category divider
-      catIdx++;
+  computed: {
+    spreads: function () {
+      var result = [{ type: 'toc' }];
+      var catIdx = 0;
+      for (var i = 0; i < this.cards.length; i++) {
+        if (catIdx < this.categories.length && i === this.categories[catIdx].startIdx) {
+          result.push({ type: 'category', catIndex: catIdx });
+          catIdx++;
+        }
+        result.push({ type: 'card', cardIndex: i });
+      }
+      return result;
+    },
+
+    spread: function () {
+      return this.spreads[this.currentSpread];
+    },
+
+    currentCard: function () {
+      if (this.spread.type === 'card') {
+        return this.cards[this.spread.cardIndex];
+      }
+      return null;
+    },
+
+    leftPageNum: function () {
+      return this.currentSpread === 0 ? '' : (this.currentSpread * 2);
+    },
+
+    rightPageNum: function () {
+      return this.currentSpread === 0 ? '' : (this.currentSpread * 2 + 1);
+    },
+
+    progressWidth: function () {
+      if (this.spreads.length <= 1) return '0%';
+      return ((this.currentSpread / (this.spreads.length - 1)) * 100) + '%';
     }
-    if (i < cardIndex) spreadIdx++;
-  }
-  renderSpread(spreadIdx);
-}
+  },
 
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-  if (!bookIsOpen) {
-    if (e.key === 'Enter' || e.key === ' ') openBook();
-    return;
+  watch: {
+    currentSpread: function (newIdx) {
+      // Preload adjacent spread images
+      var self = this;
+      [newIdx - 1, newIdx + 1].forEach(function (idx) {
+        if (idx >= 0 && idx < self.spreads.length) {
+          var s = self.spreads[idx];
+          if (s.type === 'card') {
+            var img = new Image();
+            img.src = self.cards[s.cardIndex].image;
+          }
+        }
+      });
+    }
+  },
+
+  methods: {
+    openBook: function () {
+      if (this.bookIsOpen) return;
+      this.bookIsOpen = true;
+      this.currentSpread = 0;
+      // Show swipe hint on mobile briefly
+      if (window.innerWidth <= 640) {
+        var self = this;
+        this.showSwipeHint = true;
+        setTimeout(function () { self.showSwipeHint = false; }, 3000);
+      }
+    },
+
+    prevPage: function () {
+      if (this.currentSpread > 0) this.currentSpread--;
+    },
+
+    nextPage: function () {
+      if (this.currentSpread < this.spreads.length - 1) this.currentSpread++;
+    },
+
+    goToCard: function (cardIndex) {
+      for (var i = 0; i < this.spreads.length; i++) {
+        if (this.spreads[i].type === 'card' && this.spreads[i].cardIndex === cardIndex) {
+          this.currentSpread = i;
+          return;
+        }
+      }
+    },
+
+    tocTitle: function (cat) {
+      return cat.title.replace('\n', ' \u2014 ');
+    },
+
+    catTitleHtml: function (catIndex) {
+      return this.categories[catIndex].title.replace('\n', '<br>');
+    },
+
+    catSymbol: function (catIndex) {
+      if (catIndex === 4) return '\u2605';
+      if (catIndex === 0) return '\u2694';
+      if (catIndex === 3) return '\u2601';
+      return '\u2736';
+    },
+
+    onTouchStart: function (e) {
+      this.touchStartX = e.touches[0].clientX;
+      this.touchStartY = e.touches[0].clientY;
+    },
+
+    onTouchEnd: function (e) {
+      if (!this.bookIsOpen) return;
+      var dx = e.changedTouches[0].clientX - this.touchStartX;
+      var dy = e.changedTouches[0].clientY - this.touchStartY;
+      // Only trigger if horizontal swipe is dominant and > 50px
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+        if (dx < 0) this.nextPage();
+        else this.prevPage();
+      }
+    },
+
+    onImageLoaded: function (key) {
+      this.$set(this.imgLoaded, key, true);
+    },
+
+  },
+
+  mounted: function () {
+    var self = this;
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
+      if (!self.bookIsOpen) {
+        if (e.key === 'Enter' || e.key === ' ') self.openBook();
+        return;
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') self.prevPage();
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') self.nextPage();
+    });
+
+    // Generate particles
+    var container = document.getElementById('particles');
+    for (var i = 0; i < 30; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
+      p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+      p.style.animationDelay = (Math.random() * 15) + 's';
+      container.appendChild(p);
+    }
+
+    // Listen for lazy-loaded events from directive
+    this.$el.addEventListener('lazy-loaded', function (e) {
+      if (e.detail) {
+        self.$set(self.imgLoaded, e.detail, true);
+      }
+    });
   }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevPage();
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') nextPage();
 });
-
-// Generate particles
-(function initParticles() {
-  const container = document.getElementById('particles');
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
-    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-    p.style.animationDelay = (Math.random() * 15) + 's';
-    container.appendChild(p);
-  }
-})();
 </script>
 </body>
 </html>
