@@ -39,13 +39,13 @@ const cards = files.map(file => {
 
   return {
     title,
-    image: `../${image}`,
+    image: `../${image.replace(/\.png$/, '.webp')}`,
     category,
     properties,
     effect,
     artwork,
     slug: title.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-    rawMd: content
+    rawMd: content.replace(/\.png\]\]/g, '.webp]]')
   };
 });
 
