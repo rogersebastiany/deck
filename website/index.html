@@ -939,10 +939,13 @@ body {
   .card-title { font-size: 1.1rem; }
 }
 @media (max-width: 640px) {
-  .book-scene { height: 750px; padding-bottom: 0; }
+  .header { padding: 16px 16px 10px; }
+  .header h1 { margin-bottom: 6px; }
+  .header .divider { margin: 8px auto; }
+  .book-scene { height: 520px; padding-bottom: 0; margin-bottom: 10px; }
   .book-open {
     width: 95vw;
-    height: 650px;
+    height: 460px;
     flex-direction: column;
   }
   .page-left, .page-right {
@@ -960,7 +963,7 @@ body {
     width: calc(100% + 4px);
     height: 20px;
   }
-  .book-closed { width: 280px; height: 400px; }
+  .book-closed { width: 250px; height: 360px; }
   .cover-title h2 { font-size: 1.1rem; }
 
   /* Fixed bottom nav on mobile */
@@ -986,7 +989,7 @@ body {
   }
   .swipe-hint { display: block; }
 
-  .footer { padding-bottom: 80px; }
+  .footer { padding-bottom: 80px; margin-top: 20px; padding-top: 20px; }
 }
 </style>
 </head>
