@@ -304,11 +304,12 @@ body {
 .cover-title h2 {
   font-family: 'Cinzel Decorative', serif;
   color: var(--gold);
-  font-size: 2.2rem;
+  font-size: clamp(1.6rem, 5vw, 2rem);
   text-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 20px rgba(201,168,76,0.2);
-  letter-spacing: 4px;
-  line-height: 1.2;
+  letter-spacing: 2px;
+  line-height: 1.1;
   font-weight: 900;
+  margin: 0 auto;
 }
 .cover-title .cover-sub {
   font-family: 'IM Fell English', serif;
@@ -1329,7 +1330,7 @@ body {
       <div class="corner-ornament bl"></div>
       <div class="corner-ornament br"></div>
       <div class="cover-title">
-        <h2>The Grimoire<br>of the<br>Computer Scientist</h2>
+        <h2>The Grimoire<br><span style="font-size: 0.85em; opacity: 0.9;">of the</span><br>Computer Scientist</h2>
         <p class="cover-sub">28 Cards &bull; 5 specialized archetypes</p>
       </div>
     </div>
