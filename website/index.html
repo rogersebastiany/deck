@@ -1018,20 +1018,25 @@ body {
   .header { padding: 16px 16px 10px; }
   .header h1 { margin-bottom: 6px; }
   .header .divider { margin: 8px auto; }
-  .book-scene { height: 520px; padding-bottom: 0; margin-bottom: 10px; }
+  .book-scene { height: 750px; padding-bottom: 0; margin-bottom: 10px; }
   .book-open {
     width: 95vw;
-    height: 460px;
+    height: 700px;
     flex-direction: column;
   }
   .page-left, .page-right {
     width: calc(100% - 30px);
-    height: calc(50% - 22px);
+    height: calc(50% - 25px);
     left: 15px;
     right: 15px;
   }
   .page-left { top: 15px; border-radius: 4px 4px 0 0; }
   .page-right { top: auto; bottom: 15px; border-radius: 0 0 4px 4px; }
+  .card-image-container { padding: 5px; }
+  .card-image-container img { max-height: 100%; width: 100%; object-fit: contain; }
+  .card-text-section { font-size: 0.9rem; }
+  .card-effect { padding: 12px; margin-bottom: 8px; }
+  
   .book-spine {
     top: 50%;
     left: -2px;
@@ -1039,8 +1044,9 @@ body {
     width: calc(100% + 4px);
     height: 20px;
   }
-  .book-closed { width: 250px; height: 360px; }
-  .cover-title h2 { font-size: 1.1rem; }
+  .book-closed { width: 280px; height: 400px; }
+  .cover-title h2 { font-size: 1.3rem; }
+  .cover-title .cover-sub { font-size: 0.9rem; margin-top: 10px; }
 
   /* Fixed bottom nav on mobile */
   .book-nav {
