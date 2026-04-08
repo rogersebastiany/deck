@@ -1,0 +1,5 @@
+{
+  "buildCommand": "node generate_cards.js && mkdir -p dist && cp website/index.html website/cards.json dist/ && cp *.webp dist/ && sed -i 's/\\.\\.\\//\\.\\//g' dist/index.html dist/cards.json && sed -i 's/\\.png/\\.webp/g' dist/index.html dist/cards.json",
+  "outputDirectory": "dist",
+  "framework": null
+}
