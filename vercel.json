@@ -1,5 +1,13 @@
 {
   "buildCommand": "node generate_cards.js && mkdir -p dist && cp website/index.html website/cards.json website/style.css website/app.js website/hogsmeade.svg dist/ && cp *.webp dist/ && sed -i 's/\\.\\.\\//\\.\\//g' dist/cards.json && sed -i 's/\\.png/\\.webp/g' dist/cards.json",
   "outputDirectory": "dist",
-  "framework": null
+  "framework": null,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Permissions-Policy", "value": "" }
+      ]
+    }
+  ]
 }
