@@ -687,15 +687,24 @@ body {
 }
 
 /* Navigation */
+.book-nav-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  margin-top: -20px; /* Slight overlap with scene for tighter feel */
+  min-height: 60px;
+}
 .book-nav {
-  position: absolute;
-  bottom: -40px; /* Positioned relative to book-scene now */
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 20px;
-  z-index: 999; /* Force it to stay on top */
+  background: rgba(26, 16, 8, 0.95);
+  padding: 10px 25px;
+  border-radius: 30px;
+  border: 1px solid var(--gold-dark);
+  box-shadow: 0 5px 25px rgba(0,0,0,0.6);
 }
 .nav-btn {
   background: var(--leather-mid);
@@ -1015,7 +1024,7 @@ body {
   .header { padding: 6px 16px 4px; }
   .header h1 { margin-bottom: 6px; }
   .header .divider { margin: 8px auto; }
-  .book-scene { height: 820px; padding-bottom: 0; margin: 0 auto 90px; }
+  .book-scene { height: 820px; padding-bottom: 0; margin: 0 auto 20px; }
   .book-open {
     width: 95vw;
     height: 800px;
@@ -1043,6 +1052,8 @@ body {
   .book-closed { width: 280px; height: 400px; }
   .cover-title h2 { font-size: 1.3rem; }
   .cover-title .cover-sub { font-size: 0.9rem; margin-top: 10px; }
+  
+  .book-nav-wrapper { margin-top: 0; z-index: 1001; }
 
   /* Fixed bottom nav on mobile */
   .book-nav {
@@ -1050,11 +1061,13 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
+    width: 100%;
+    border-radius: 0;
     transform: none;
     background: linear-gradient(180deg, rgba(42,24,16,0.95), var(--leather-dark));
     padding: 10px 24px 14px;
     border-top: 1px solid rgba(201,168,76,0.3);
-    z-index: 100;
+    z-index: 1002;
     justify-content: space-between;
     gap: 12px;
     backdrop-filter: blur(8px);
@@ -1490,8 +1503,10 @@ body {
     </div>
 
   </div> <!-- End of book-open -->
+</section>
 
-  <!-- Navigation (Moved outside to fix z-index) -->
+<!-- Navigation (Moved to normal flow to avoid overlap) -->
+<div class="book-nav-wrapper">
   <div class="book-nav" v-if="bookIsOpen">
     <div class="nav-progress" :style="{ width: progressWidth }"></div>
     <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPageGlitter($event)">&larr;</button>
@@ -1499,8 +1514,7 @@ body {
     <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter($event)">&rarr;</button>
     <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
   </div>
-
-</section>
+</div>
 
 <!-- Footer -->
 <footer class="footer">
