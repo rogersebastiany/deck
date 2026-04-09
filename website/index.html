@@ -161,7 +161,7 @@
             </div>
             <div class="card-text-section">
               <div class="card-effect" v-html="formatEffect(currentCard)"></div>
-              <div class="card-artwork-desc"><strong>Artwork</strong>{{ currentCard.artwork }}</div>
+              <div class="card-artwork-desc"><strong>Artwork</strong><span v-html="formatArtwork(currentCard.artwork)"></span></div>
             </div>
 
           </div>

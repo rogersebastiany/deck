@@ -227,6 +227,16 @@ new Vue({
       this.$set(this.imgLoaded, key, true);
     },
 
+    formatArtwork: function (text) {
+      if (!text) return '';
+      return text
+        .replace(/\[\[([^\]|]*?)(?:\|([^\]]*?))?\]\]/g, function (_, a, b) { return b || a; })
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[\s(])\*(?!\s)([^*\n]+?)\*(?=[\s).,!?]|$)/g, '$1<em>$2</em>')
+        .replace(/__(.+?)__/g, '<strong>$1</strong>');
+    },
+
     formatEffect: function (card) {
       if (card.effect && card.effect.trim()) return card.effect;
       if (card.rawMd) {
