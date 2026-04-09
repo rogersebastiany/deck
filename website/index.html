@@ -720,21 +720,47 @@ body {
 .book-nav-wrapper {
   position: relative;
   width: 100%;
-  display: flex;
-  justify-content: center;
   z-index: 1000;
-  margin-top: -20px; /* Slight overlap with scene for tighter feel */
-  min-height: 60px;
 }
 .book-nav {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 20px;
-  background: rgba(26, 16, 8, 0.95);
-  padding: 10px 25px;
-  border-radius: 30px;
+}
+
+/* Side buttons for Desktop */
+.nav-btn.prev-side, .nav-btn.next-side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
+  z-index: 1001;
+  background: rgba(42, 24, 16, 0.6);
+  backdrop-filter: blur(4px);
   border: 1px solid var(--gold-dark);
-  box-shadow: 0 5px 25px rgba(0,0,0,0.6);
+}
+.nav-btn.prev-side { left: -80px; }
+.nav-btn.next-side { right: -80px; }
+
+.nav-btn.prev-side:hover, .nav-btn.next-side:hover {
+  background: var(--leather-mid);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Bottom info bar */
+.nav-info-bar {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
 }
 .nav-btn {
   background: var(--leather-mid);
@@ -1098,15 +1124,17 @@ body {
   opacity: 0.6;
 }
 
-/* ===== RESPONSIVE ===== */
+.desktop-only { display: flex; }
+.mobile-only { display: none; }
+
 @media (max-width: 1150px) {
-  .book-scene { height: 800px; }
-  .book-open { width: 95vw; height: 750px; }
-  .book-closed { width: 460px; height: 600px; }
-  .page-content { padding: 20px 15px; }
-  .card-title { font-size: 1.1rem; }
+  .nav-btn.prev-side { left: -60px; }
+  .nav-btn.next-side { right: -60px; }
 }
+
 @media (max-width: 640px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: flex !important; }
   .header { padding: 6px 16px 4px; }
   .header h1 { margin-bottom: 6px; }
   .header .divider { margin: 8px auto; }
@@ -1553,7 +1581,7 @@ body {
             </div>
             <div class="card-text-section">
               <div class="card-effect" v-html="formatEffect(currentCard)"></div>
-              <div class="card-artwork-desc"><strong>Artwork</strong>{{ currentCard.artwork }}</div>
+              <div class="card-artwork-desc"><strong>Artwork</strong>{{ formatArtwork(currentCard.artwork) }}</div>
             </div>
 
           </div>
@@ -1599,20 +1627,23 @@ body {
       </div>
       <span class="page-number">{{ rightPageNum }}</span>
     </div>
+    <!-- Side Buttons (Desktop) -->
+    <button v-if="bookIsOpen" class="nav-btn prev-side desktop-only" :disabled="currentSpread === 0" @click="prevPageGlitter()">&larr;</button>
+    <button v-if="bookIsOpen" class="nav-btn next-side desktop-only" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter()">&rarr;</button>
+
+    <!-- Navigation Indicator/Mobile Nav -->
+    <div class="book-nav-wrapper" v-if="bookIsOpen">
+      <div class="book-nav">
+        <div class="nav-progress" :style="{ width: progressWidth }"></div>
+        <button class="nav-btn mobile-only" :disabled="currentSpread === 0" @click="prevPageGlitter()">&larr;</button>
+        <span class="page-indicator">{{ currentSpread + 1 }} / {{ spreads.length }}</span>
+        <button class="nav-btn mobile-only" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter()">&rarr;</button>
+        <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
+      </div>
+    </div>
 
   </div> <!-- End of book-open -->
 </section>
-
-<!-- Navigation (Moved to normal flow to avoid overlap) -->
-<div class="book-nav-wrapper">
-  <div class="book-nav" v-if="bookIsOpen">
-    <div class="nav-progress" :style="{ width: progressWidth }"></div>
-    <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPageGlitter($event)">&larr;</button>
-    <span class="page-indicator">{{ currentSpread + 1 }} / {{ spreads.length }}</span>
-    <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter($event)">&rarr;</button>
-    <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
-  </div>
-</div>
 
 <!-- Footer -->
 <footer class="footer">
@@ -2394,6 +2425,13 @@ new Vue({
         }
       }
       return "No effect text found.";
+
+    },
+
+    formatArtwork: function (text) {
+      if (!text) return "";
+      return text.replace(/\[\[(.*?)(?:\|.*?)?\]\]/g, "").trim();
+    },
     },
 
     // Glitter burst at a point
