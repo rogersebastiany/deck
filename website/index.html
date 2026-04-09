@@ -529,13 +529,12 @@ body {
 
 /* Page content */
 .page-content {
-  padding: 30px 25px;
+  padding: 15px; /* Reduced from 30px 25px */
   height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 1;
-  overflow: hidden;
 }
 
 /* Page inner wrapper for transitions */
@@ -697,13 +696,13 @@ body {
 /* Navigation */
 .book-nav {
   position: absolute;
-  bottom: -50px;
+  bottom: -80px; /* Moved further down */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 20px;
-  z-index: 15;
+  z-index: 100; /* Ensure it is above everything else */
 }
 .nav-btn {
   background: var(--leather-mid);
@@ -1013,8 +1012,8 @@ body {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1150px) {
-  .book-scene { height: 640px; }
-  .book-open { width: 95vw; height: 600px; }
+  .book-scene { height: 800px; }
+  .book-open { width: 95vw; height: 750px; }
   .book-closed { width: 460px; height: 600px; }
   .page-content { padding: 20px 15px; }
   .card-title { font-size: 1.1rem; }
