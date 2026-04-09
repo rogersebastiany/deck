@@ -529,14 +529,13 @@ body {
 
 /* Page content */
 .page-content {
-  padding: 15px 15px 90px 15px; /* Added 90px bottom padding to FORCE content up */
+  padding: 15px;
   height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 1;
 }
-<!-- Cache Buster: 1775692321 -->
 
 /* Page inner wrapper for transitions */
 .page-inner {
@@ -697,13 +696,13 @@ body {
 /* Navigation */
 .book-nav {
   position: absolute;
-  bottom: -80px; /* Moved further down */
+  bottom: -40px; /* Positioned relative to book-scene now */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 20px;
-  z-index: 100; /* Ensure it is above everything else */
+  z-index: 999; /* Force it to stay on top */
 }
 .nav-btn {
   background: var(--leather-mid);
@@ -1497,14 +1496,15 @@ body {
       <span class="page-number">{{ rightPageNum }}</span>
     </div>
 
-    <!-- Navigation -->
-    <div class="book-nav">
-      <div class="nav-progress" :style="{ width: progressWidth }"></div>
-      <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPageGlitter($event)">&larr;</button>
-      <span class="page-indicator">{{ currentSpread + 1 }} / {{ spreads.length }}</span>
-      <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter($event)">&rarr;</button>
-      <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
-    </div>
+  </div> <!-- End of book-open -->
+
+  <!-- Navigation (Moved outside to fix z-index) -->
+  <div class="book-nav" v-if="bookIsOpen">
+    <div class="nav-progress" :style="{ width: progressWidth }"></div>
+    <button class="nav-btn" :disabled="currentSpread === 0" @click="prevPageGlitter($event)">&larr;</button>
+    <span class="page-indicator">{{ currentSpread + 1 }} / {{ spreads.length }}</span>
+    <button class="nav-btn" :disabled="currentSpread === spreads.length - 1" @click="nextPageGlitter($event)">&rarr;</button>
+    <span class="swipe-hint" :class="{ show: showSwipeHint }">swipe to turn pages</span>
   </div>
 
 </section>
