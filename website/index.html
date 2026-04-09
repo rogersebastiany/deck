@@ -1569,10 +1569,11 @@ body {
         <transition name="page-flip" mode="out-in">
 
           <!-- TOC Right -->
-          <div v-if="spread.type === 'toc'" key="toc-right" class="card-image-container">
+          <div v-if="spread.type === 'toc'" key="toc-right" class="card-image-container" @click="openModal({title: 'Computer Scientist Summon', image: './summon computer sciencepng.webp'})">
             <img v-lazy="'./summon computer sciencepng.webp'"
                  alt="Computer Scientist Summon"
-                 decoding="async">
+                 decoding="async"
+                 style="cursor: zoom-in;">
             <div class="img-shimmer"></div>
           </div>
 
