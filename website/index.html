@@ -635,11 +635,14 @@ body {
 
 /* Right page: card image */
 .card-image-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
+  padding: 0;
   position: relative;
   z-index: 1;
   background: rgba(0,0,0,0.02);
@@ -648,6 +651,8 @@ body {
 .card-image-container img {
   max-width: 100%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
@@ -1018,7 +1023,7 @@ body {
   .header { padding: 6px 16px 4px; }
   .header h1 { margin-bottom: 6px; }
   .header .divider { margin: 8px auto; }
-  .book-scene { height: 820px; padding-bottom: 0; margin: 0 auto 10px; }
+  .book-scene { height: 820px; padding-bottom: 0; margin: 0 auto 90px; }
   .book-open {
     width: 95vw;
     height: 800px;
@@ -1032,14 +1037,7 @@ body {
   }
   .page-left { top: 15px; border-radius: 4px 4px 0 0; }
   .page-right { top: auto; bottom: 15px; border-radius: 0 0 4px 4px; }
-  .card-image-container { padding: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-  .card-image-container img { 
-    max-width: 100%; 
-    max-height: 100%; 
-    width: auto; 
-    height: auto; 
-    object-fit: contain; 
-  }
+  .page-content { padding: 15px; }
   .card-text-section { font-size: 0.9rem; }
   .card-effect { padding: 12px; margin-bottom: 8px; }
   
