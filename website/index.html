@@ -76,28 +76,30 @@
 
 .card-title {
   font-family: 'Cinzel Decorative', serif;
-  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
   color: var(--ink);
-  margin-bottom: 12px;
-  line-height: 1.2;
+  margin-bottom: 10px;
+  line-height: 1.1;
 }
 .card-effect {
-  font-size: 1.2rem;
+  font-family: 'IM Fell English', serif;
+  font-size: 1.15rem;
   line-height: 1.4;
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 400;
   margin-bottom: 15px;
-  padding: 18px;
-  background: rgba(0,0,0,0.06);
-  border-left: 5px solid var(--gold-dark);
+  padding: 15px;
+  background: rgba(0,0,0,0.04);
+  border-left: 4px solid var(--gold-dark);
+  border-radius: 0 4px 4px 0;
 }
 .card-artwork-desc {
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.4;
   color: var(--ink-light);
 }
 .card-category {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: bold;
 }
 .footer a {
@@ -536,14 +538,16 @@ body {
   position: relative;
   z-index: 1;
   min-height: 0;
+  overflow-y: auto; /* Enable whole page scroll */
 }
+.page-content::-webkit-scrollbar { width: 4px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: var(--paper-edge); border-radius: 2px; }
 
 /* Page inner wrapper for transitions */
 .page-inner {
-  height: 100%;
   display: flex;
   flex-direction: column;
-  min-height: 0;
 }
 
 /* Left page: card info */
@@ -571,8 +575,35 @@ body {
   padding: 3px 12px;
   border: 1px solid var(--gold-dark);
   color: var(--gold-dark);
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   border-radius: 2px;
+}
+.card-stars {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+/* Levels 1-4: Subdued Bronze */
+.stars-low {
+  color: #8a6d2b;
+  opacity: 0.6;
+}
+/* Levels 5-6: Deep Gold */
+.stars-mid {
+  color: #c9a84c;
+  text-shadow: 0 0 5px rgba(201,168,76,0.3);
+}
+/* Levels 7-9: Bright Gold (Original favorite) */
+.stars-high {
+  color: var(--gold-light);
+  text-shadow: 0 0 8px rgba(232,212,139,0.4);
+}
+/* Levels 10-12: Peak Gold with subtle radiance */
+.stars-legendary {
+  color: var(--gold-light);
+  text-shadow: 
+    0 0 2px rgba(0,0,0,0.5),
+    0 0 12px rgba(232,212,139,0.6);
 }
 
 .stats-grid {
@@ -600,12 +631,8 @@ body {
 }
 
 .card-text-section {
-  flex: 1;
-  overflow-y: auto;
+  width: 100%;
 }
-.card-text-section::-webkit-scrollbar { width: 4px; }
-.card-text-section::-webkit-scrollbar-track { background: transparent; }
-.card-text-section::-webkit-scrollbar-thumb { background: var(--paper-edge); border-radius: 2px; }
 
 .card-effect {
   font-size: 0.82rem;
@@ -636,13 +663,13 @@ body {
 
 /* Right page: card image */
 .card-image-container {
-  flex: 1;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  margin: 0;
   position: relative;
   z-index: 1;
 }
@@ -821,6 +848,62 @@ body {
 @keyframes pageOut {
   from { opacity: 1; }
   to { opacity: 0; transform: translateX(-8px); }
+}
+
+/* Card Modal */
+.card-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  cursor: zoom-out;
+  padding: 20px;
+}
+.modal-content {
+  position: relative;
+  max-width: 90vh;
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+}
+.enlarged-card {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  box-shadow: 0 0 50px rgba(201,168,76,0.3);
+  border-radius: 12px;
+  animation: zoom-in 0.3s ease-out;
+}
+.modal-close {
+  position: absolute;
+  top: -40px;
+  right: -10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2.5rem;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.modal-close:hover { opacity: 1; }
+
+@keyframes zoom-in {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 
 /* ===== FOOTER ===== */
@@ -1413,7 +1496,7 @@ body {
               <div v-for="idx in cat.count" :key="idx"
                    class="toc-entry"
                    @click="goToCardGlitter($event, cat.startIdx + idx - 1)">
-                {{ cards[cat.startIdx + idx - 1].name }}
+                {{ cards[cat.startIdx + idx - 1].title }}
               </div>
             </div>
           </div>
@@ -1435,34 +1518,44 @@ body {
           <div v-else :key="'card-l-' + spread.cardIndex"
                :class="['page-inner', { 'golden-card': currentCard && currentCard.golden }]">
             <div class="card-category">{{ currentCard.category }}</div>
-            <div class="card-title">{{ currentCard.name }}</div>
-            <div class="card-type-badge">{{ currentCard.type }}</div>
+            <div class="card-title">{{ currentCard.title }}</div>
+                        <div class="card-type-badge">{{ (currentCard.properties && currentCard.properties['Card Type']) ? currentCard.properties['Card Type'] : currentCard.type }}</div>
+            
+            <!-- Stars for Level -->
+            <div v-if="currentCard.properties && currentCard.properties.Level && currentCard.properties.Level !== '—'" 
+                 :class="['card-stars', getStarClass(currentCard.properties.Level)]">
+              <span v-for="n in (parseInt(currentCard.properties.Level) || 0)" :key="n">✪</span>
+            </div>
+
             <div class="stats-grid">
-              <div v-if="currentCard.attribute !== '\u2014'" class="stat-item">
-                <div class="stat-label">Attribute</div>
-                <div class="stat-value">{{ currentCard.attribute }}</div>
-              </div>
-              <div v-if="currentCard.level !== '\u2014'" class="stat-item">
-                <div class="stat-label">Level</div>
-                <div class="stat-value">{{ currentCard.level }}</div>
-              </div>
-              <div v-if="currentCard.monsterType" class="stat-item">
-                <div class="stat-label">Type</div>
-                <div class="stat-value">{{ currentCard.monsterType }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">ATK</div>
-                <div class="stat-value">{{ currentCard.atk }}</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-label">DEF</div>
-                <div class="stat-value">{{ currentCard.def }}</div>
-              </div>
+              <template v-if="currentCard.properties">
+                <div v-if="currentCard.properties.Attribute && currentCard.properties.Attribute !== '\u2014'" class="stat-item">
+                  <div class="stat-label">Attribute</div>
+                  <div class="stat-value">{{ currentCard.properties.Attribute }}</div>
+                </div>
+                <div v-if="currentCard.properties.Level && currentCard.properties.Level !== '\u2014'" class="stat-item">
+                  <div class="stat-label">Level</div>
+                  <div class="stat-value">{{ currentCard.properties.Level }}</div>
+                </div>
+                <div v-if="currentCard.properties.Type" class="stat-item">
+                  <div class="stat-label">Type</div>
+                  <div class="stat-value">{{ currentCard.properties.Type }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">ATK</div>
+                  <div class="stat-value">{{ currentCard.properties.ATK }}</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-label">DEF</div>
+                  <div class="stat-value">{{ currentCard.properties.DEF }}</div>
+                </div>
+              </template>
             </div>
             <div class="card-text-section">
-              <div class="card-effect">{{ currentCard.effect }}</div>
+              <div class="card-effect" v-html="formatEffect(currentCard)"></div>
               <div class="card-artwork-desc"><strong>Artwork</strong>{{ currentCard.artwork }}</div>
             </div>
+
           </div>
 
         </transition>
@@ -1477,7 +1570,7 @@ body {
 
           <!-- TOC Right -->
           <div v-if="spread.type === 'toc'" key="toc-right" class="card-image-container">
-            <img v-lazy="'../summon computer sciencepng.webp'"
+            <img v-lazy="'./summon computer sciencepng.webp'"
                  alt="Computer Scientist Summon"
                  decoding="async">
             <div class="img-shimmer"></div>
@@ -1493,10 +1586,11 @@ body {
           </div>
 
           <!-- Card Right -->
-          <div v-else :key="'card-r-' + spread.cardIndex" class="card-image-container">
+          <div v-else :key="'card-r-' + spread.cardIndex" class="card-image-container" @click="openModal(currentCard)">
             <img v-lazy="currentCard.image"
-                 :alt="currentCard.name"
-                 decoding="async">
+                 :alt="currentCard.title"
+                 decoding="async"
+                 style="cursor: zoom-in;">
             <div class="img-shimmer"></div>
           </div>
 
@@ -1530,6 +1624,16 @@ body {
   </div>
   <p class="footer-copy">&copy; 2026 &bull; Roger Sebastiany</p>
 </footer>
+
+<!-- Enlarged Card Modal -->
+<transition name="fade">
+  <div v-if="isModalOpen" class="card-modal" @click.self="closeModal">
+    <div class="modal-content">
+      <button class="modal-close" @click="closeModal">&times;</button>
+      <img :src="modalCard.image" :alt="modalCard.title" class="enlarged-card">
+    </div>
+  </div>
+</transition>
 
 </div><!-- /#app -->
 
@@ -1596,127 +1700,556 @@ new Vue({
     touchStartY: 0,
     showSwipeHint: false,
     imgLoaded: {},
-
-    // Card data
+    isModalOpen: false,
+    modalCard: null,
     cards: [
-      // -- Programming Language Monsters --
-      { category: "Programming Language Monster", name: "Python, the Script-Snake", type: "Effect Monster", attribute: "WIND", level: 7, monsterType: "Reptile", atk: 1800, def: 1200, code: "CD001", image: "../pytohn.webp",
-        effect: "Once per turn, you can target 1 face-up monster your opponent controls; that target cannot declare an attack until the end of your opponent\u2019s next turn.",
-        artwork: "A glowing green digital serpent coiled in a matrix of code, with the Python logo visible. Background filled with JavaScript and Python code snippets." },
-      { category: "Programming Language Monster", name: "Java, the Robust Guardian", type: "Continuous Effect Monster", attribute: "EARTH", level: 6, monsterType: "Warrior", atk: 2100, def: 2400, code: "CD001", image: "../java.webp",
-        effect: "This card gains 300 ATK for each \"JVM Token\" you control. If this face-up card is destroyed by an opponent\u2019s card effect and sent to the GY: You can Special Summon 1 \"JVM Token\" (Warrior/EARTH/Level 1/ATK 0/DEF 0) in Defense Position.",
-        artwork: "A heavily armored golden-bronze warrior with a glowing blue orb in his chest plate, holding a massive shield. Code streams in the background." },
-      { category: "Programming Language Monster", name: "Kotlin, the Concise Warrior", type: "Effect Monster", attribute: "WIND", level: 5, monsterType: "Warrior", atk: 1900, def: 1000, code: "CD001", image: "../kotlin.webp",
-        effect: "If you control a face-up \"Java, the Robust Guardian\", you can Special Summon this card from your hand. You can pay 1000 Life Points; this card can attack your opponent directly this turn.",
-        artwork: "A sleek, blue-and-white armored warrior with a flowing blue cape, dual-wielding short blades. Surrounded by streaming code in a dynamic action pose." },
-      { category: "Programming Language Monster", name: "C++, the Shadow Architect", type: "Effect Monster", attribute: "DARK", level: 6, monsterType: "Spellcaster", atk: 2300, def: 1900, code: "CD001", image: "../vpp.webp",
-        effect: "Target 1 face-up monster on the field; this card\u2019s Type and Attribute become the same as that target. If that target is destroyed, destroy this card.",
-        artwork: "A dark-cloaked sorcerer figure holding a glowing staff with lightning-bolt shaped tip. Multiple cursor pointers (0x00FF) float around him. Blueprint-style diagrams in background." },
-      { category: "Programming Language Monster", name: "Lisp, the Macro-Rendas Wizard", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Spellcaster", atk: 2500, def: 2000, code: "CD001", image: "../lisp.webp",
-        effect: "Once per turn, you can pay 500 Life Points to choose 1 Spell Card from your Deck and place it on top of your Deck.",
-        artwork: "An ancient wizard with a long white beard, wearing elaborate blue robes with Celtic knot patterns. He holds a staff and conjures a glowing orb displaying \"(DEFINE MACRO (FOO ...))\"." },
-      { category: "Programming Language Monster", name: "Haskell, the Functional Alchemist", type: "Continuous Effect Monster", attribute: "WIND", level: 6, monsterType: "Spellcaster", atk: 2600, def: 2200, code: "CD001", image: "../haskell.webp",
-        effect: "This card cannot be destroyed by card effects that do not target specifically a \"Functional Alchemist\" type monster. Once per turn, you can banish the top card of your Deck; if it is a Monster Card, add it to your hand.",
-        artwork: "A bald, bespectacled alchemist in teal/green robes holding glowing crystal cards marked \"A\u2192B\". Crystalline laboratory environment with geometric patterns." },
-      { category: "Programming Language Monster", name: "SQL, the Data Devourer", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 2800, def: 2400, code: "CD001", image: "../sql.webp",
-        effect: "When this card is Summoned: You can target up to 2 cards in your opponent\u2019s Spell & Trap Zone; send them to the GY. This card cannot attack during the turn you activate this effect.",
-        artwork: "A massive armored machine-humanoid with SQL command plates embedded in its body: \"SELECT\", \"WHERE\", \"DELETE FROM\", \"JOIN\", \"INDEX\". Glowing blue core in chest." },
-
-      // -- Trap Cards - Philosophy & Mathematics --
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Computer Scientist Summon", type: "Trap Card", attribute: "\u2014", level: "\u2014", atk: 0, def: 0, code: "CD001", image: "../summon computer sciencepng.webp",
-        effect: "Trap Card: Activate when you need a computer scientist to 10x code your project while automating it as well.",
-        artwork: "A shirtless man with sunglasses, headphones, and a beard making a hand gesture. Surrounded by holographic screens showing Python, JavaScript, and other code. Background full of binary code and floating monitors." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "The Law of Excluded Middle", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap incognita.webp",
-        effect: "Activate when your opponent activates a card or effect that would create a new choice. If your choice (HEADS or TAILS) is correct, negate that effect and destroy that card.",
-        artwork: "A balance scale with \"1 TRUE\" on the left side and \"0 FALSE\" on the right side. The FALSE side is crashing down, shattering the ground. Red background with logical symbols." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Russell\u2019s Paradox", type: "Continuous Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../cont trap paradoxo.webp",
-        effect: "When your opponent activates a card effect that targets a monster that opponent controls, negate that effect and destroy all face-up monsters with that same name on the field.",
-        artwork: "An elderly philosopher holding a sign reading \"The set of all sets that do not contain themselves.\" Swirling red vortex with text \"Must contain itself\" repeating in a loop." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Orthogonal Projection", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: 0, def: 0, code: "CD001", image: "../projecao ortogonal anula o atak.webp",
-        effect: "Activate when an opponent\u2019s monster declares an attack. Change that monster\u2019s ATK to 0, and if you do, that monster cannot use its effects this turn.",
-        artwork: "A red geometric projection space with mathematical formulas: P = A(A^T A)^{-1} A^T. A large red \"X\" mark is projected onto a grid plane. Linear algebra projection diagrams." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Empty Intersection", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap interseccao.webp",
-        effect: "Activate when your opponent Special Summons a monster(s). Until the end of your opponent\u2019s next turn, your opponent cannot Special Summon monsters with the same Type or Attribute as that Summoned monster(s).",
-        artwork: "Two overlapping Venn diagram circles \u2014 one blue and one red \u2014 with an empty set symbol (\u2205) in the intersection. \"A\u2229B=\u2205\" displayed in all four corners." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Kant\u2019s Categorical Imperative", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap kant.webp",
-        effect: "Activate when your opponent activates a card or effect that has already been activated during this turn. Negate that effect, and if you do, destroy that card.",
-        artwork: "A statue of Immanuel Kant in classical robes, chained by glowing red chains. Digital overlay showing: \"MAXIM \u2192 UNIVERSALIZABILITY\", \"DUTY\", \"NON-CONTRADICTION\"." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "I Think, Therefore I Am", type: "Counter Trap", attribute: "\u2014", level: "\u2014", atk: "\u2014", def: "\u2014", code: "CD001", image: "../counter trap descartes complicada essa.webp",
-        effect: "Activate when your opponent destroys the last monster you control. Special Summon 1 \"Descartes Token\" (Spellcaster/LIGHT/Level 1/ATK 0/DEF 0). If this Token is destroyed, your opponent gains 2000 Life Points.",
-        artwork: "Descartes meditating cross-legged on a red grid plane. Swirling blue text spirals around him: \"COGITO\", \"SELF-AWARENESS\", \"ERGO\", \"I THINK\". Empty set symbols and \"null\" scattered around." },
-      { category: "Trap Card \u2014 Philosophy & Mathematics", name: "Descartes\u2019 Conscious Summon", type: "Trap Card", attribute: "\u2014", level: 10, monsterType: "Spellcaster", atk: 3000, def: 2500, code: "CD001", image: "../descartes v3.webp",
-        effect: "Must be Special Summoned by the effect of \"I Think, Therefore I Am\". Cannot be destroyed by battle or card effects. Your opponent cannot activate card effects in response to this card\u2019s effects. Once per turn: You can inflict 1000 damage to your opponent.",
-        artwork: "An ascended version of Descartes, now standing with arms raised, radiating power. Red energy aura. Multiple glowing \u2205 symbols. The philosopher has achieved full consciousness." },
-
-      // -- Descartes Monster --
-      { category: "Descartes Monster", name: "Descartes, the Existential Sorcerer", type: "Effect Monster", attribute: "LIGHT", level: 6, monsterType: "Spellcaster", atk: 2400, def: 2000, code: "CD001", image: "../descartes v2.webp",
-        effect: "This card can be Special Summoned by your effect that names a \"Descartes Token\". Once per turn, you can pay 1000 Life Points to negate a Spell or Trap card activated by your opponent.",
-        artwork: "Same Descartes meditating figure, but now framed as a golden-bordered monster card. Swirling \"COGITO\", \"SELF-AWARENESS\" text. Empty set symbols and \"null\" values surround him." },
-
-      // -- AWS Cloud Monsters --
-      { category: "AWS Cloud Monster", name: "IAM Rule Executioner", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstro iam.webp",
-        effect: "Once per turn: you can pay 1000 LP; target 1 face-up monster on the field. That target\u2019s effects are negated until the end of this turn. At the end of the damage step, if this card battled an opponent\u2019s monster: banish that monster.",
-        artwork: "A dark, menacing armored executioner figure with twin circular saw blades in each hand. Cards and documents scatter around it. Red glowing background with mechanical details." },
-      { category: "AWS Cloud Monster", name: "Cognito, HTTPSV2/GRPC Identity Guardian", type: "Effect Monster", attribute: "LIGHT", level: 6, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstro cognito.webp",
-        effect: "While this face-up card is on the field, your opponent cannot activate the effects of monsters Summoned from the Extra Deck. Once per turn: you can pay 1000 LP; negate the activation of 1 Spell/Trap card. This card is unaffected by other Machine-type monster effects.",
-        artwork: "A sleek blue-and-white robotic guardian holding a \"Token\" bubble shield and a lock-emblem shield. \"gRPC\" label overhead. AWS Cognito lock symbol on its chest plate." },
-      { category: "AWS Cloud Monster", name: "EKS Kubernetes Orchestrator", type: "Effect Monster", attribute: "LIGHT", level: 8, monsterType: "Machine", atk: 3000, def: 2500, code: "CD001", image: "../monstor eks.webp",
-        effect: "Once per turn, if a \"Pod\" monster you control is destroyed by battle: you can Special Summon 1 \"Pod Token\" (Machine/LIGHT/Level 1/ATK 0/DEF 0). This card gains 500 ATK for each \"Pod Token\" on the field.",
-        artwork: "A massive robotic orchestrator with the Kubernetes logo on its chest. Surrounded by floating green cube \"pods\" and holographic deployment screens. \"kubectl\" interface visible." },
-      { category: "AWS Cloud Monster", name: "AWS ELB Load Balancer", type: "Effect Monster", attribute: "LIGHT", level: 7, monsterType: "Machine", atk: 2500, def: 3000, code: "CD001", image: "../monstro elb.webp",
-        effect: "While this face-up card is on the field, load distribution targets across the IT traffic. This card gains 500 ATK for each \"Pod Token\".",
-        artwork: "A cybernetic octopus-like machine with a central blue glowing eye and multiple mechanical tentacles extending outward, distributing energy streams. Green and red data flows radiate from its core." },
-      { category: "AWS Cloud Monster", name: "API Gateway Gatekeeper", type: "Effect Monster", attribute: "DARK", level: 7, monsterType: "Machine", atk: 2400, def: 2500, code: "CD001", image: "../monstro api gateway.webp",
-        effect: "While this face-up card is on the field, once per turn, if a \"Traffic Packet\" is filtered \u2014 physically stopping unauthorized data, spectral data instantly forwarding approved packets to another as 1 \"Backend module.\"",
-        artwork: "A massive mechanical gateway structure with the API logo at its center \u2014 a blue orb surrounded by interlocking red mechanical arms. Data streams flow through and around it." },
-      { category: "AWS Cloud Monster", name: "Cloudfront Edge-Specter", type: "Effect Monster", attribute: "LIGHT", level: 7, monsterType: "Cyber", atk: 2400, def: 2100, code: "CD001", image: "../monstro cloudfront.webp",
-        effect: "While this card is on the field, all \"AWS\" monsters you control can declare an attack during the same turn they are Summoned. If this card is destroyed: you can add 1 \"Edge Token\" from your deck or GY to your hand.",
-        artwork: "A ghostly, luminescent humanoid figure made of pure blue energy, running at high speed across a red grid. Surrounded by floating CDN node icons. The embodiment of edge computing." },
-      { category: "AWS Cloud Monster", name: "S3 Sentinel of the Infinite", type: "Effect Monster", attribute: "EARTH", level: 8, monsterType: "Machine", atk: 2800, def: 3500, code: "CD001", image: "../monstro s3.webp",
-        effect: "This card cannot be destroyed by card effects. Once per turn: you can target 1 \"Policy\" or \"Statement\" card in your GY or banished; protect it from removal until end of next turn. This card gains 500 ATK for each card under its protection.",
-        artwork: "A colossal stone-and-metal golem with the S3 bucket icon embedded in its chest core. Massive arms with hexagonal armored segments. An immovable guardian of stored data." },
-      { category: "AWS Cloud Monster", name: "AWS Lambda, Serverless Phantom", type: "Effect Monster", attribute: "WIND", level: 5, monsterType: "Machine", atk: 2200, def: 1800, code: "CD001", image: "../monstro lambdinha.webp",
-        effect: "While this face-up card is on the field, event-driven triggers activate connected modules. Triggered by JWT payload connections. This card gains 500 ATK for \"Pod Token\" payloads.",
-        artwork: "A ghostly, ethereal humanoid figure with the Lambda (\u03bb) symbol glowing on its chest. Tentacle-like connections reach out to surrounding service icons. Exists everywhere and nowhere." },
-
-      // -- Golden Boss Cards --
-      { category: "Golden Boss Card", name: "Route 53 DNS Hydra", type: "Effect Monster", attribute: "WATER", level: 9, monsterType: "Machine", atk: 3000, def: 3500, code: "CD001", image: "../golden route 53 dns hydra.webp", golden: true,
-        effect: "Cannot be Normal Summoned/Set. Must first be Special Summoned by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card; until end of turn, this card cannot be destroyed, and you can switch the Battle Position of 1 face-up monster.",
-        artwork: "A magnificent golden three-headed hydra dragon with ornate armor plating and a glowing blue cross symbol on its central head. Radiant golden light emanates from behind. Golden premium rare border." },
-      { category: "Golden Boss Card", name: "RDS Aurora Leviathan", type: "Effect Monster", attribute: "WATER", level: 10, monsterType: "Machine", atk: 4000, def: 3500, code: "CD001", image: "../golden rds aurora leviathan.webp", golden: true,
-        effect: "Cannot be Normal Summoned/Set. Must first be Special Summoned by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card; until end of turn, this card cannot be destroyed, and you can change the Battle Position of 1 face-up monster.",
-        artwork: "A towering golden-armored divine figure with an ornate crown and flowing ethereal energy. Blue crystalline energy radiates from its core. The ultimate database guardian \u2014 Aurora\u2019s relational power made manifest." },
-      { category: "Golden Boss Card", name: "Ontological Tautology", type: "Counter Trap", attribute: "\u2014", level: 12, atk: "\u221e", def: "\u221e", code: "CD001", image: "../Xgolden Ontological Tautology.webp", golden: true,
-        effect: "Cannot be negated. This card cannot be destroyed. Activate when your opponent activates a card or effect. Negate that effect. Your opponent cannot activate cards or effects in response. While on the field, your \"AWS\" and \"Cloud\" monsters cannot be banished, returned, or destroyed. Your opponent cannot change the field or hand size.",
-        artwork: "A golden divine figure standing before a glowing altar inscribed with \"A is A\" and \"EXISTS BECAUSE IT EXISTS\". The card radiates pure golden light. \"A=A\" formula displayed prominently. The ultimate tautological truth." },
+      {
+            "title": "Ontological Tautology",
+            "image": "./Xgolden Ontological Tautology.webp",
+            "category": "Golden Boss Cards",
+            "properties": {
+                  "Card Type": "Counter Trap",
+                  "Attribute": "\u2014",
+                  "Level": "12",
+                  "ATK": "\u221e",
+                  "DEF": "\u221e",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A golden divine figure standing before a glowing altar/tablet inscribed with \"A is A\" and \"EXISTS BECAUSE IT EXISTS\". The card radiates pure golden light. \"A=A\" formula displayed prominently. The ultimate tautological truth \u2014 a self-evident, self-justifying existence. Golden premium rare border. The most powerful card in the entire deck.",
+            "slug": "ontological-tautology",
+            "rawMd": "# Ontological Tautology\n\n![[../Xgolden Ontological Tautology.webp]]\n\n| Property  | Value        |\n| --------- | ------------ |\n| Card Type | Counter Trap |\n| Attribute | \u2014            |\n| Level     | 12           |\n| ATK       | \u221e            |\n| DEF       | \u221e            |\n| Code      | CD001        |\n| Edition   | 1st Edition  |\n\n## Category\n[[Home#Golden Boss Cards|Golden Boss Card]]\n\n## Card Text\n\n> **[RESPONSE]**\n> (Counter Trap) Cannot be negated. This card cannot be destroyed. Activate when your opponent activates a card or effect. Negate that effect. Your opponent cannot activate cards or effects in response to this card. While this card is on the field, your \"AWS\" and \"Cloud\" monsters cannot be banished, returned to the hand or deck, or destroyed. Your opponent cannot change the field or hand size.\n\n## Artwork Description\nA golden divine figure standing before a glowing altar/tablet inscribed with \"A is A\" and \"EXISTS BECAUSE IT EXISTS\". The card radiates pure golden light. \"A=A\" formula displayed prominently. The ultimate tautological truth \u2014 a self-evident, self-justifying existence. Golden premium rare border. The most powerful card in the entire deck.\n\n## Synergies\n- **The ultimate card** \u2014 cannot be negated, cannot be destroyed, infinite stats\n- Complete protection for all [[Home#AWS Cloud Monsters|AWS and Cloud monsters]]\n- Locks opponent out of responses entirely\n- Only a card like [[Russell's Paradox]] could thematically challenge its logic\n- The philosophical apex: existence justified by existence itself\n\n## Tags\n#trap #counter-trap #golden #boss #ultimate #philosophy #level12\n"
+      },
+      {
+            "title": "RDS Aurora Leviathan",
+            "image": "./golden rds aurora leviathan.webp",
+            "category": "Golden Boss Cards",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "WATER",
+                  "Level": "10",
+                  "Type": "Machine",
+                  "ATK": "4000",
+                  "DEF": "3500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A towering golden-armored divine figure with an ornate crown and flowing ethereal energy. Similar golden premium rare border as [[Route 53 DNS Hydra]]. Blue crystalline energy radiates from its core. The ultimate database guardian \u2014 Aurora's relational power made manifest.",
+            "slug": "rds-aurora-leviathan",
+            "rawMd": "# RDS Aurora Leviathan\n\n![[../golden rds aurora leviathan.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | WATER          |\n| Level     | 10             |\n| Type      | Machine        |\n| ATK       | 4000           |\n| DEF       | 3500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Golden Boss Cards|Golden Boss Card]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 10/WATER) Cannot be Normal Summoned/Set. Must first be Special Summoned (from your hand) by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card from your hand or face-up field; until the end of this turn, this card cannot be destroyed by battle or card effects, and you can change the Battle Position of 1 face-up monster. During the next turn, that position cannot be changed.\n\n## Artwork Description\nA towering golden-armored divine figure with an ornate crown and flowing ethereal energy. Similar golden premium rare border as [[Route 53 DNS Hydra]]. Blue crystalline energy radiates from its core. The ultimate database guardian \u2014 Aurora's relational power made manifest.\n\n## Synergies\n- Highest ATK in the deck at 4000\n- Same summoning condition as [[Route 53 DNS Hydra]] \u2014 banish 2 AWS/Cloud monsters\n- The ultimate beater of the [[Home#AWS Cloud Monsters|AWS archetype]]\n- Only [[Ontological Tautology]] and [[Orthogonal Projection]] can stop it\n- Shares golden status with [[Route 53 DNS Hydra]] and [[Ontological Tautology]]\n\n## Tags\n#monster #effect #water #machine #aws #golden #boss #level10\n"
+      },
+      {
+            "title": "Route 53 DNS Hydra",
+            "image": "./golden route 53 dns hydra.webp",
+            "category": "Golden Boss Cards",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "WATER",
+                  "Level": "9",
+                  "Type": "Machine",
+                  "ATK": "3000",
+                  "DEF": "3500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A magnificent golden three-headed hydra dragon with ornate armor plating and a glowing blue cross symbol on its central head. Radiant golden light emanates from behind. The card itself has a golden/premium rare border. The multi-headed beast represents DNS resolution \u2014 routing queries to the correct destination.",
+            "slug": "route-53-dns-hydra",
+            "rawMd": "# Route 53 DNS Hydra\n\n![[../golden route 53 dns hydra.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | WATER          |\n| Level     | 9              |\n| Type      | Machine        |\n| ATK       | 3000           |\n| DEF       | 3500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Golden Boss Cards|Golden Boss Card]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 9/WATER) Cannot be Normal Summoned/Set. Must first be Special Summoned (from your hand) by banishing 2 monsters that mention \"AWS\" or \"Cloud\". Once per turn (Quick Effect): you can banish 1 card from your hand or face-up field; until the end of this turn, this card cannot be destroyed by battle or card effects, and you can switch the Battle Position of 1 face-up monster. During the next turn, that position cannot be changed.\n\n## Artwork Description\nA magnificent golden three-headed hydra dragon with ornate armor plating and a glowing blue cross symbol on its central head. Radiant golden light emanates from behind. The card itself has a golden/premium rare border. The multi-headed beast represents DNS resolution \u2014 routing queries to the correct destination.\n\n## Synergies\n- Requires 2 [[Home#AWS Cloud Monsters|AWS/Cloud monsters]] to summon (banish cost)\n- Quick Effect protection makes it nearly unkillable\n- Position switching disrupts opponent's battle strategy\n- Shares golden status with [[RDS Aurora Leviathan]] and [[Ontological Tautology]]\n- Can be tributed for [[Ontological Tautology]]\n\n## Tags\n#monster #effect #water #machine #aws #golden #boss #level9\n"
+      },
+      {
+            "title": "API Gateway Gatekeeper",
+            "image": "./monstro api gateway.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "DARK",
+                  "Level": "7",
+                  "Type": "Machine",
+                  "ATK": "2400",
+                  "DEF": "2500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A massive mechanical gateway structure with the API logo at its center \u2014 a blue orb surrounded by interlocking red mechanical arms. Data streams (blue and red energy beams) flow through and around it. Circuit-board panels and server blocks flank the sides.",
+            "slug": "api-gateway-gatekeeper",
+            "rawMd": "# API Gateway Gatekeeper\n\n![[../monstro api gateway.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | DARK           |\n| Level     | 7              |\n| Type      | Machine        |\n| ATK       | 2400           |\n| DEF       | 2500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 6/LIGHT) While this face-up card is on the field, once per turn, if a \"Traffic Packet\" is filtered \u2014 physically stopping unauthorized data, spectral \"spectra\" data instantly forwarding approved packets to another as 1 \"Backend modules to smaller-waiting module.\"\n\n## Artwork Description\nA massive mechanical gateway structure with the API logo at its center \u2014 a blue orb surrounded by interlocking red mechanical arms. Data streams (blue and red energy beams) flow through and around it. Circuit-board panels and server blocks flank the sides.\n\n## Synergies\n- Traffic filtering protects backend [[Home#AWS Cloud Monsters|AWS monsters]]\n- Works with [[Cognito, HTTPSV2-GRPC Identity Guardian]] for authentication layer\n- Routes to [[AWS Lambda, Serverless Phantom]] for processing\n- Gateway for [[AWS ELB Load Balancer]] distribution\n\n## Tags\n#monster #effect #dark #machine #aws #level7\n"
+      },
+      {
+            "title": "AWS ELB Load Balancer",
+            "image": "./monstro elb.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "LIGHT",
+                  "Level": "7",
+                  "Type": "Machine",
+                  "ATK": "2500",
+                  "DEF": "3000",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A cybernetic octopus-like machine with a central blue glowing eye and multiple mechanical tentacles extending outward, distributing energy streams. Green and red data flows radiate from its core. The embodiment of elastic load balancing.",
+            "slug": "aws-elb-load-balancer",
+            "rawMd": "# AWS ELB Load Balancer\n\n![[../monstro elb.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | LIGHT          |\n| Level     | 7              |\n| Type      | Machine        |\n| ATK       | 2500           |\n| DEF       | 3000           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 7/LIGHT) While this face-up card is on the field, load distribution targets and problems across the IT traffic. You control \"load distribution\". You can choose to distribute packets from your hand and move. This card gains 500 ATK for each \"Pod Token\".\n\n## Artwork Description\nA cybernetic octopus-like machine with a central blue glowing eye and multiple mechanical tentacles extending outward, distributing energy streams. Green and red data flows radiate from its core. The embodiment of elastic load balancing.\n\n## Synergies\n- High DEF wall that distributes damage/targeting\n- Gains ATK from [[EKS Kubernetes Orchestrator]]'s Pod Tokens\n- Defensive complement to [[API Gateway Gatekeeper]]\n- Pairs with [[Cloudfront Edge-Specter]] for traffic management\n\n## Tags\n#monster #effect #light #machine #aws #level7\n"
+      },
+      {
+            "title": "AWS Lambda, Serverless Phantom",
+            "image": "./monstro lambdinha.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "WIND",
+                  "Level": "5",
+                  "Type": "Machine",
+                  "ATK": "2200",
+                  "DEF": "1800",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A ghostly, ethereal humanoid figure with the Lambda (\u03bb) symbol glowing on its chest. Tentacle-like connections reach out to surrounding service icons: S3, API Gateway, SNS, DynamoDB, JWT Payloads. The serverless phantom exists everywhere and nowhere \u2014 triggered by events, vanishing after execution.",
+            "slug": "aws-lambda--serverless-phantom",
+            "rawMd": "# AWS Lambda, Serverless Phantom\n\n![[../monstro lambdinha.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | WIND           |\n| Level     | 5              |\n| Type      | Machine        |\n| ATK       | 2200           |\n| DEF       | 1800           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 5/WIND) While this face-up card is on the field, load control gets a 1 level-less encoded concept/event logic, event modules. Triggered to \"JWT payload\" connected that conceptiate from Pod and land actives. You. This card gains 500 ATK or \"Pod Token\" payloads.\n\n## Artwork Description\nA ghostly, ethereal humanoid figure with the Lambda (\u03bb) symbol glowing on its chest. Tentacle-like connections reach out to surrounding service icons: S3, API Gateway, SNS, DynamoDB, JWT Payloads. The serverless phantom exists everywhere and nowhere \u2014 triggered by events, vanishing after execution.\n\n## Synergies\n- Event-driven triggers connect to multiple [[Home#AWS Cloud Monsters|AWS]] services\n- JWT payload processing pairs with [[Cognito, HTTPSV2-GRPC Identity Guardian]]\n- Pod Token synergy with [[EKS Kubernetes Orchestrator]]\n- Triggered by [[API Gateway Gatekeeper]] routing\n\n## Tags\n#monster #effect #wind #machine #aws #level5 #serverless\n"
+      },
+      {
+            "title": "Cloudfront Edge-Specter",
+            "image": "./monstro cloudfront.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "LIGHT",
+                  "Level": "7",
+                  "Type": "Cyber",
+                  "ATK": "2400",
+                  "DEF": "2100",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A ghostly, luminescent humanoid figure made of pure blue energy, running at high speed across a red grid. Surrounded by floating CDN node icons. The embodiment of edge computing and content delivery \u2014 fast, ethereal, everywhere at once.",
+            "slug": "cloudfront-edge-specter",
+            "rawMd": "# Cloudfront Edge-Specter\n\n![[../monstro cloudfront.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | LIGHT          |\n| Level     | 7              |\n| Type      | Cyber          |\n| ATK       | 2400           |\n| DEF       | 2100           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[CIBER/EFEITO]**\n> While this card is on the field, all \"AWS\" monsters you control can declare an attack during the same turn they are Normal or Special Summoned. If this card is destroyed by battle or card effect: you can add 1 \"Edge Token\" from your deck or GY to your hand.\n\n## Artwork Description\nA ghostly, luminescent humanoid figure made of pure blue energy, running at high speed across a red grid. Surrounded by floating CDN node icons. The embodiment of edge computing and content delivery \u2014 fast, ethereal, everywhere at once.\n\n## Synergies\n- Grants all [[Home#AWS Cloud Monsters|AWS monsters]] immediate attack capability (pseudo-haste)\n- \"Edge Token\" recovery on destruction ensures card advantage\n- Speed enabler for [[EKS Kubernetes Orchestrator]] and [[IAM Rule Executioner]]\n- Pairs with [[AWS ELB Load Balancer]] for aggressive plays\n\n## Tags\n#monster #effect #light #cyber #aws #level7\n"
+      },
+      {
+            "title": "Cognito, HTTPSV2/GRPC Identity Guardian",
+            "image": "./monstro cognito.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "LIGHT",
+                  "Level": "6",
+                  "Type": "Machine",
+                  "ATK": "3000",
+                  "DEF": "2500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A sleek blue-and-white robotic guardian holding a \"Token\" bubble shield in one hand and a lock-emblem shield in the other. \"gRPC\" label overhead. The robot has a key-shaped trident weapon. AWS Cognito lock symbol on its chest plate.",
+            "slug": "cognito--httpsv2-grpc-identity-guardian",
+            "rawMd": "# Cognito, HTTPSV2/GRPC Identity Guardian\n\n![[../monstro cognito.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | LIGHT          |\n| Level     | 6              |\n| Type      | Machine        |\n| ATK       | 3000           |\n| DEF       | 2500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 6/LIGHT) While this face-up card is on the field, your opponent cannot activate the effects of monsters Summoned from the Extra Deck. Once per turn: you can pay 1000 LP; negate the activation of 1 Spell/Trap card or effect that would affect monsters you control. This card is unaffected by other Machine-type monster effects.\n\n## Artwork Description\nA sleek blue-and-white robotic guardian holding a \"Token\" bubble shield in one hand and a lock-emblem shield in the other. \"gRPC\" label overhead. The robot has a key-shaped trident weapon. AWS Cognito lock symbol on its chest plate.\n\n## Synergies\n- Extra Deck lockout cripples fusion/synchro/xyz strategies\n- Spell/Trap negation protects entire [[Home#AWS Cloud Monsters|AWS]] board\n- Immune to [[IAM Rule Executioner]]'s effect (Machine immunity)\n- Pairs with [[API Gateway Gatekeeper]] for complete access control\n\n## Tags\n#monster #effect #light #machine #aws #level6\n"
+      },
+      {
+            "title": "EKS Kubernetes Orchestrator",
+            "image": "./monstor eks.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "LIGHT",
+                  "Level": "8",
+                  "Type": "Machine",
+                  "ATK": "3000",
+                  "DEF": "2500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A massive robotic orchestrator with the Kubernetes logo on its chest. Surrounded by floating green cube \"pods\" and holographic deployment screens. \"kubectl\" interface visible. A smaller humanoid figure kneels before it.",
+            "slug": "eks-kubernetes-orchestrator",
+            "rawMd": "# EKS Kubernetes Orchestrator\n\n![[../monstor eks.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | LIGHT          |\n| Level     | 8              |\n| Type      | Machine        |\n| ATK       | 3000           |\n| DEF       | 2500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 8/LIGHT) While this face-up card is on the field, once per turn, if a \"Pod\" monster you control is destroyed by battle: you can Special Summon 1 \"Pod Token\" (Machine/LIGHT/Level 1/ATK 0/DEF 0) from your hand or deck. This card gains 500 ATK for each \"Pod Token\" on the field.\n\n## Artwork Description\nA massive robotic orchestrator with the Kubernetes logo on its chest. Surrounded by floating green cube \"pods\" and holographic deployment screens. \"kubectl\" interface visible. A smaller humanoid figure kneels before it.\n\n## Synergies\n- Self-replenishing Pod Tokens scale its ATK infinitely\n- Token generation feeds [[AWS Lambda, Serverless Phantom]]\n- Core boss of the [[Home#AWS Cloud Monsters|AWS archetype]]\n- Protected by [[Cognito, HTTPSV2-GRPC Identity Guardian]]'s negation\n\n## Tags\n#monster #effect #light #machine #aws #level8 #boss\n"
+      },
+      {
+            "title": "IAM Rule Executioner",
+            "image": "./monstro iam.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "DARK",
+                  "Level": "7",
+                  "Type": "Machine",
+                  "ATK": "3000",
+                  "DEF": "2500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A dark, menacing armored executioner figure with twin circular saw blades in each hand. Cards and documents scatter around it. Red glowing background with mechanical details. The embodiment of AWS IAM access control.",
+            "slug": "iam-rule-executioner",
+            "rawMd": "# IAM Rule Executioner\n\n![[../monstro iam.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | DARK           |\n| Level     | 7              |\n| Type      | Machine        |\n| ATK       | 3000           |\n| DEF       | 2500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> Once per turn: you can pay 1000 LP; target 1 face-up monster on the field. That target's effects are negated the end of this turn, and it cannot activate its effects. At the end of the damage step, if this card battled an opponent's monster: banish that monster.\n\n## Artwork Description\nA dark, menacing armored executioner figure with twin circular saw blades in each hand. Cards and documents scatter around it. Red glowing background with mechanical details. The embodiment of AWS IAM access control.\n\n## Synergies\n- Effect negation + banish makes it the ultimate removal tool\n- Protects [[Cognito, HTTPSV2-GRPC Identity Guardian]] by removing threats\n- Core piece for the [[Home#AWS Cloud Monsters|AWS archetype]] alongside [[EKS Kubernetes Orchestrator]]\n- Can be summoned via [[Route 53 DNS Hydra]] or [[RDS Aurora Leviathan]] tribute\n\n## Tags\n#monster #effect #dark #machine #aws #level7\n"
+      },
+      {
+            "title": "S3 Sentinel of the Infinite",
+            "image": "./monstro s3.webp",
+            "category": "AWS Cloud Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "EARTH",
+                  "Level": "8",
+                  "Type": "Machine",
+                  "ATK": "2800",
+                  "DEF": "3500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A colossal stone-and-metal golem with the S3 bucket icon embedded in its chest core. Massive arms with hexagonal armored segments. \"S3 bucket\" labels on its joints. An immovable guardian of stored data \u2014 the ultimate defensive wall.",
+            "slug": "s3-sentinel-of-the-infinite",
+            "rawMd": "# S3 Sentinel of the Infinite\n\n![[../monstro s3.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | EARTH          |\n| Level     | 8              |\n| Type      | Machine        |\n| ATK       | 2800           |\n| DEF       | 3500           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#AWS Cloud Monsters|AWS Cloud Monster]]\n\n## Card Text\n\n> **[MACHINE/EFFECT]**\n> (Level 8/EARTH) This card cannot be destroyed by card effects. Once per turn: you can target 1 \"Policy\" or \"Statement\" card in your GY or that is banished; protect it from being removed from that location until the end of the next turn. This card gains 500 ATK for each card under its protection.\n\n## Artwork Description\nA colossal stone-and-metal golem with the S3 bucket icon embedded in its chest core. Massive arms with hexagonal armored segments. \"S3 bucket\" labels on its joints. An immovable guardian of stored data \u2014 the ultimate defensive wall.\n\n## Synergies\n- Indestructible by card effects \u2014 must be beaten in battle\n- Highest DEF in the [[Home#AWS Cloud Monsters|AWS archetype]] (3500)\n- Policy/Statement protection synergizes with [[IAM Rule Executioner]]\n- Defensive anchor while [[EKS Kubernetes Orchestrator]] builds Pod Tokens\n\n## Tags\n#monster #effect #earth #machine #aws #level8 #tank\n"
+      },
+      {
+            "title": "Computer Scientist Summon",
+            "image": "./summon computer sciencepng.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Trap Card",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "0",
+                  "DEF": "0",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A shirtless man with sunglasses, headphones, and a beard making a hand gesture. Surrounded by holographic screens showing Python, JavaScript, and other code. Necklace with a pendant. Background full of binary code and floating monitors.",
+            "slug": "computer-scientist-summon",
+            "rawMd": "# Computer Scientist Summon\n\n![[../summon computer sciencepng.webp]]\n\n| Property  | Value       |\n| --------- | ----------- |\n| Card Type | Trap Card   |\n| Attribute | \u2014           |\n| Level     | \u2014           |\n| ATK       | 0           |\n| DEF       | 0           |\n| Code      | CD001       |\n| Edition   | 1st Edition |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **Trap Card:** Activate when you need a computer scientist to 10x code your project while automating it as well.\n\n## Artwork Description\nA shirtless man with sunglasses, headphones, and a beard making a hand gesture. Surrounded by holographic screens showing Python, JavaScript, and other code. Necklace with a pendant. Background full of binary code and floating monitors.\n\n## Synergies\n- Thematic support for all [[Home#Programming Language Monsters|Programming Language Monsters]]\n- Flavor card representing the player/duelist archetype\n\n## Tags\n#trap #programming #flavor\n"
+      },
+      {
+            "title": "Descartes' Conscious Summon",
+            "image": "./descartes v3.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Trap Card",
+                  "Attribute": "\u2014",
+                  "Level": "10",
+                  "Type": "Spellcaster",
+                  "ATK": "3000",
+                  "DEF": "2500",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "An ascended version of Descartes, now standing with arms raised, radiating power. Same meditation imagery but with intensified red energy aura. Multiple glowing \u2205 symbols. The philosopher has achieved full consciousness.",
+            "slug": "descartes--conscious-summon",
+            "rawMd": "# Descartes' Conscious Summon\n\n![[../descartes v3.webp]]\n\n| Property  | Value       |\n| --------- | ----------- |\n| Card Type | Trap Card   |\n| Attribute | \u2014           |\n| Level     | 10          |\n| Type      | Spellcaster |\n| ATK       | 3000        |\n| DEF       | 2500        |\n| Code      | CD001       |\n| Edition   | 1st Edition |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[Level 10/LIGHT/Spellcaster. ATK/3000 DEF/2500.]**\n> Must be Special Summoned by the effect of \"[[I Think, Therefore I Am]]\".\n>\n> **[EFFECT]** Cannot be destroyed by battle or card effects. Your opponent cannot activate card effects in response to this card's effects. Once per turn: You can inflict 1000 damage to your opponent.\n\n## Artwork Description\nAn ascended version of Descartes, now standing with arms raised, radiating power. Same meditation imagery but with intensified red energy aura. Multiple glowing \u2205 symbols. The philosopher has achieved full consciousness.\n\n## Synergies\n- Ultimate evolution of the Descartes chain: [[I Think, Therefore I Am]] \u2192 [[Descartes, the Existential Sorcerer]] \u2192 this card\n- Indestructible + unresponsive effects = near-unstoppable\n- Burn damage creates a win condition alongside combat\n- Only [[Ontological Tautology]] can truly counter this card\n\n## Tags\n#trap #philosophy #descartes #boss #level10\n"
+      },
+      {
+            "title": "Empty Intersection",
+            "image": "./counter trap intersec\u00e7\u00e3o.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Counter Trap",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "\u2014",
+                  "DEF": "\u2014",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "Two overlapping Venn diagram circles \u2014 one blue (Type: MACHINE, Attribute: DARK) and one red (Attribute: LIGHT, Type: REPTILE) \u2014 with an empty set symbol (\u2205) in the intersection. \"A\u2229B=\u2205\" displayed in all four corners of the art.",
+            "slug": "empty-intersection",
+            "rawMd": "# Empty Intersection\n\n![[../counter trap intersec\u00e7\u00e3o.webp]]\n\n| Property  | Value        |\n| --------- | ------------ |\n| Card Type | Counter Trap |\n| Attribute | \u2014            |\n| Level     | \u2014            |\n| ATK       | \u2014            |\n| DEF       | \u2014            |\n| Code      | CD001        |\n| Edition   | 1st Edition  |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[RESPONSE] (Counter Trap)**\n> Activate when your opponent Special Summons a monster(s). Until the end of your opponent's next turn, your opponent cannot Special Summon monsters with the same Type or Attribute as that Summoned monster(s).\n\n## Artwork Description\nTwo overlapping Venn diagram circles \u2014 one blue (Type: MACHINE, Attribute: DARK) and one red (Attribute: LIGHT, Type: REPTILE) \u2014 with an empty set symbol (\u2205) in the intersection. \"A\u2229B=\u2205\" displayed in all four corners of the art.\n\n## Synergies\n- Shuts down swarming strategies based on same Type/Attribute\n- Devastating against [[Home#AWS Cloud Monsters|AWS Cloud Monsters]] (mostly MACHINE type)\n- Set theory counter alongside [[Orthogonal Projection]] and [[Russell's Paradox]]\n\n## Tags\n#trap #counter-trap #mathematics #set-theory\n"
+      },
+      {
+            "title": "I Think, Therefore I Am",
+            "image": "./counter trap descartes complicada essa.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Counter Trap",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "\u2014",
+                  "DEF": "\u2014",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "Descartes meditating cross-legged on a red grid plane. Swirling blue text spirals around him: \"COGITO\", \"SELF-AWARENESS\", \"ERGO\", \"I THINK\". Empty set symbols (\u2205) and \"null\" scattered around. Ethereal, transcendent atmosphere.",
+            "slug": "i-think--therefore-i-am",
+            "rawMd": "# I Think, Therefore I Am\n\n![[../counter trap descartes complicada essa.webp]]\n\n| Property  | Value        |\n| --------- | ------------ |\n| Card Type | Counter Trap |\n| Attribute | \u2014            |\n| Level     | \u2014            |\n| ATK       | \u2014            |\n| DEF       | \u2014            |\n| Code      | CD001        |\n| Edition   | 1st Edition  |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[RESPONSE] (Counter Trap)**\n> Activate when your opponent destroys the last monster you control. Special Summon 1 \"Descartes Token\" (Spellcaster/LIGHT/Level 1/ATK 0/DEF 0). If this Token is destroyed, your opponent gains 2000 Life Points.\n\n## Artwork Description\nDescartes meditating cross-legged on a red grid plane. Swirling blue text spirals around him: \"COGITO\", \"SELF-AWARENESS\", \"ERGO\", \"I THINK\". Empty set symbols (\u2205) and \"null\" scattered around. Ethereal, transcendent atmosphere.\n\n## Synergies\n- Creates the \"Descartes Token\" needed to summon [[Descartes, the Existential Sorcerer]]\n- Last line of defense \u2014 activates when board is wiped\n- Part of the Descartes combo chain with [[Descartes' Conscious Summon]]\n\n## Tags\n#trap #counter-trap #philosophy #descartes #combo-piece\n"
+      },
+      {
+            "title": "Kant's Categorical Imperative",
+            "image": "./counter trap kant.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Counter Trap",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "\u2014",
+                  "DEF": "\u2014",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A statue of Immanuel Kant in classical robes, chained by glowing red chains. Digital overlay showing: \"MAXIM \u2192 UNIVERSALIZABILITY\", \"DUTY\", \"NON-CONTRADICTION\". Mathematical and logical symbols (\u03a3, \u2205, \u03bb) float around. The philosopher stands on a red grid platform.",
+            "slug": "kant-s-categorical-imperative",
+            "rawMd": "# Kant's Categorical Imperative\n\n![[../counter trap kant.webp]]\n\n| Property  | Value        |\n| --------- | ------------ |\n| Card Type | Counter Trap |\n| Attribute | \u2014            |\n| Level     | \u2014            |\n| ATK       | \u2014            |\n| DEF       | \u2014            |\n| Code      | CD001        |\n| Edition   | 1st Edition  |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[RESPONSE] (Counter Trap)**\n> Activate when your opponent activates a card or effect that has already been activated during this turn. Negate that effect, and if you do, destroy that card.\n\n## Artwork Description\nA statue of Immanuel Kant in classical robes, chained by glowing red chains. Digital overlay showing: \"MAXIM \u2192 UNIVERSALIZABILITY\", \"DUTY\", \"NON-CONTRADICTION\". Mathematical and logical symbols (\u03a3, \u2205, \u03bb) float around. The philosopher stands on a red grid platform.\n\n## Synergies\n- Punishes repeated effect activation \u2014 strong vs combo decks\n- Philosophy trap chain with [[Russell's Paradox]] and [[The Law of Excluded Middle]]\n- Protects [[Descartes, the Existential Sorcerer]] from repeated negation attempts\n\n## Tags\n#trap #counter-trap #philosophy #ethics\n"
+      },
+      {
+            "title": "Orthogonal Projection",
+            "image": "./projecao ortogonal anula o atak.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Counter Trap",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "0",
+                  "DEF": "0",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A red geometric projection space with mathematical formulas: P = A(A^T A)^{-1} A^T and v^T Pv = |Pv|^2. A large red \"X\" mark is projected onto a grid plane. Linear algebra projection diagrams with vectors and coordinate axes.",
+            "slug": "orthogonal-projection",
+            "rawMd": "# Orthogonal Projection\n\n![[../projecao ortogonal anula o atak.webp]]\n\n| Property  | Value        |\n| --------- | ------------ |\n| Card Type | Counter Trap |\n| Attribute | \u2014            |\n| Level     | \u2014            |\n| ATK       | 0            |\n| DEF       | 0            |\n| Code      | CD001        |\n| Edition   | 1st Edition  |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[RESPONSE] (Counter Trap)**\n> Activate when an opponent's monster declares an attack. Change that monster's ATK to 0, and if you do, that monster cannot use its effects this turn.\n\n## Artwork Description\nA red geometric projection space with mathematical formulas: P = A(A^T A)^{-1} A^T and v^T Pv = |Pv|^2. A large red \"X\" mark is projected onto a grid plane. Linear algebra projection diagrams with vectors and coordinate axes.\n\n## Synergies\n- Complete attack shutdown \u2014 pairs with [[Python, the Script-Snake]] for total lockdown\n- Nullifies even [[Route 53 DNS Hydra]] or [[RDS Aurora Leviathan]]\n- Math-themed counter alongside [[Empty Intersection]]\n\n## Tags\n#trap #counter-trap #mathematics #linear-algebra\n"
+      },
+      {
+            "title": "Russell's Paradox",
+            "image": "./cont trap paradoxo.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Continuous Trap",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "\u2014",
+                  "DEF": "\u2014",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "An elderly philosopher (resembling Bertrand Russell) holding a sign reading \"The set of all sets that do not contain themselves.\" Swirling red vortex with text \"Must contain itself\" repeating in a loop. SQL and Python code snippets visible in the background referencing self-containment logic.",
+            "slug": "russell-s-paradox",
+            "rawMd": "# Russell's Paradox\n\n![[../cont trap paradoxo.webp]]\n\n| Property  | Value           |\n| --------- | --------------- |\n| Card Type | Continuous Trap |\n| Attribute | \u2014               |\n| Level     | \u2014               |\n| ATK       | \u2014               |\n| DEF       | \u2014               |\n| Code      | CD001           |\n| Edition   | 1st Edition     |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[Continuous Trap]**\n> When your opponent activates a card effect that targets a monster that opponent controls, negate that effect and destroy all face-up monsters with that same name on the field.\n\n## Artwork Description\nAn elderly philosopher (resembling Bertrand Russell) holding a sign reading \"The set of all sets that do not contain themselves.\" Swirling red vortex with text \"Must contain itself\" repeating in a loop. SQL and Python code snippets visible in the background referencing self-containment logic.\n\n## Synergies\n- Devastating against decks that run multiple copies of the same monster\n- Continuous presence pairs with [[The Law of Excluded Middle]] for lockdown\n- Philosophical trap chain with [[Kant's Categorical Imperative]]\n\n## Tags\n#trap #continuous-trap #philosophy #logic #set-theory\n"
+      },
+      {
+            "title": "The Law of Excluded Middle",
+            "image": "./counter trap incognita.webp",
+            "category": "Trap Cards - Philosophy & Mathematics",
+            "properties": {
+                  "Card Type": "Counter Trap",
+                  "Attribute": "\u2014",
+                  "Level": "\u2014",
+                  "ATK": "\u2014",
+                  "DEF": "\u2014",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A balance scale with \"1 TRUE\" on the left side and \"0 FALSE\" on the right side. The FALSE side is crashing down, shattering the ground. Red background with logical symbols (\u2192, \u2194, \u03bb) and binary code. NAND and NOR gate labels visible.",
+            "slug": "the-law-of-excluded-middle",
+            "rawMd": "# The Law of Excluded Middle\n\n![[../counter trap incognita.webp]]\n\n| Property  | Value        |\n| --------- | ------------ |\n| Card Type | Counter Trap |\n| Attribute | \u2014            |\n| Level     | \u2014            |\n| ATK       | \u2014            |\n| DEF       | \u2014            |\n| Code      | CD001        |\n| Edition   | 1st Edition  |\n\n## Category\n[[Home#Trap Cards - Philosophy & Mathematics|Trap Card - Philosophy & Mathematics]]\n\n## Card Text\n\n> **[RESPONSE] (Counter Trap)**\n> Activate when your opponent activates a card or effect that would create a new choice. If your choice (HEADS or TAILS) is correct, negate that effect and destroy that card.\n\n## Artwork Description\nA balance scale with \"1 TRUE\" on the left side and \"0 FALSE\" on the right side. The FALSE side is crashing down, shattering the ground. Red background with logical symbols (\u2192, \u2194, \u03bb) and binary code. NAND and NOR gate labels visible.\n\n## Synergies\n- Coin-flip negation pairs with [[Russell's Paradox]] for trap-heavy strategies\n- Can protect against effects that threaten [[Haskell, the Functional Alchemist]]\n- Philosophy counter trap alongside [[Kant's Categorical Imperative]]\n\n## Tags\n#trap #counter-trap #philosophy #logic\n"
+      },
+      {
+            "title": "C++, the Shadow Architect",
+            "image": "./vpp.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "DARK",
+                  "Level": "6",
+                  "Type": "Spellcaster",
+                  "ATK": "2300",
+                  "DEF": "1900",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "Target 1 face-up monster on the field; this card's Type and Attribute become the same as that target. If that target is destroyed, destroy this card.",
+            "artwork": "A dark-cloaked sorcerer figure holding a glowing staff with lightning-bolt shaped tip. Multiple cursor pointers (0x00FF) float around him. \"Class hierarchy\" label visible. Blueprint-style diagrams in background.",
+            "slug": "c----the-shadow-architect",
+            "rawMd": "# C++, the Shadow Architect\n\n![[../vpp.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | DARK           |\n| Level     | 6              |\n| Type      | Spellcaster    |\n| ATK       | 2300           |\n| DEF       | 1900           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[EFFECT]**\n> Target 1 face-up monster on the field; this card's Type and Attribute become the same as that target. If that target is destroyed, destroy this card.\n\n## Artwork Description\nA dark-cloaked sorcerer figure holding a glowing staff with lightning-bolt shaped tip. Multiple cursor pointers (0x00FF) float around him. \"Class hierarchy\" label visible. Blueprint-style diagrams in background.\n\n## Synergies\n- Can copy any monster's Type/Attribute for strategic advantage\n- Risky pairing with [[Haskell, the Functional Alchemist]] (destruction link)\n- Versatile support for [[SQL, the Data Devourer]] combos\n\n## Tags\n#monster #effect #dark #programming-language #level6\n"
+      },
+      {
+            "title": "Haskell, the Functional Alchemist",
+            "image": "./haskell.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Continuous Effect Monster",
+                  "Attribute": "WIND",
+                  "Level": "6",
+                  "Type": "Spellcaster",
+                  "ATK": "2600",
+                  "DEF": "2200",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "Once per turn, you can banish the top card of your Deck; if it is a Monster Card, add it to your hand.",
+            "artwork": "A bald, bespectacled alchemist in teal/green robes holding glowing crystal cards marked \"A\u2192B\". Crystalline laboratory environment with geometric patterns and arrows in the background.",
+            "slug": "haskell--the-functional-alchemist",
+            "rawMd": "# Haskell, the Functional Alchemist\n\n![[../haskell.webp]]\n\n| Property  | Value                     |\n| --------- | ------------------------- |\n| Card Type | Continuous Effect Monster |\n| Attribute | WIND                      |\n| Level     | 6                         |\n| Type      | Spellcaster               |\n| ATK       | 2600                      |\n| DEF       | 2200                      |\n| Code      | CD001                     |\n| Edition   | 1st Edition               |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[CONTINUOUS EFFECT]**\n> This card cannot be destroyed by card effects that do not target specifically a \"Functional Alchemist\" type monster.\n>\n> **[EFFECT]**\n> Once per turn, you can banish the top card of your Deck; if it is a Monster Card, add it to your hand.\n\n## Artwork Description\nA bald, bespectacled alchemist in teal/green robes holding glowing crystal cards marked \"A\u2192B\". Crystalline laboratory environment with geometric patterns and arrows in the background.\n\n## Synergies\n- Protection effect makes it hard to remove\n- Card advantage engine for the deck\n- Resilient alongside [[Java, the Robust Guardian]]'s defensive stats\n\n## Tags\n#monster #continuous-effect #effect #wind #programming-language #level6\n"
+      },
+      {
+            "title": "Java, the Robust Guardian",
+            "image": "./java.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Continuous Effect Monster",
+                  "Attribute": "EARTH",
+                  "Level": "6",
+                  "Type": "Warrior",
+                  "ATK": "2100",
+                  "DEF": "2400",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "A heavily armored golden-bronze warrior with a glowing blue orb in his chest plate, holding a massive shield. Code streams in the background. The character wears sunglasses and has a beard.",
+            "slug": "java--the-robust-guardian",
+            "rawMd": "# Java, the Robust Guardian\n\n![[../java.webp]]\n\n| Property  | Value            |\n| --------- | ---------------- |\n| Card Type | Continuous Effect Monster |\n| Attribute | EARTH            |\n| Level     | 6                |\n| Type      | Warrior          |\n| ATK       | 2100             |\n| DEF       | 2400             |\n| Code      | CD001            |\n| Edition   | 1st Edition      |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[CONTINUOUS EFFECT]**\n> This card gains 300 ATK for each \"JVM Token\" you control. If this face-up card is destroyed by an opponent's card effect (by battle or by card effect) and sent to the GY: You can Special Summon 1 \"JVM Token\" (Warrior/EARTH/Level 1/ATK 0/DEF 0) to your side of the field in Defense Position.\n\n## Artwork Description\nA heavily armored golden-bronze warrior with a glowing blue orb in his chest plate, holding a massive shield. Code streams in the background. The character wears sunglasses and has a beard.\n\n## Synergies\n- Generates JVM Tokens that boost its own ATK\n- [[Kotlin, the Concise Warrior]] can be Special Summoned if this card is face-up\n- Defensive wall for [[Python, the Script-Snake]] strategies\n\n## Tags\n#monster #continuous-effect #earth #programming-language #level6\n"
+      },
+      {
+            "title": "Kotlin, the Concise Warrior",
+            "image": "./kotlin.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "WIND",
+                  "Level": "5",
+                  "Type": "Warrior",
+                  "ATK": "1900",
+                  "DEF": "1000",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "If you control a face-up \"[[Java, the Robust Guardian]]\", you can Special Summon this card from your hand. You can pay 1000 Life Points; this card can attack your opponent directly this turn.",
+            "artwork": "A sleek, blue-and-white armored warrior with a flowing blue cape, dual-wielding short blades. Surrounded by streaming code in a dynamic action pose.",
+            "slug": "kotlin--the-concise-warrior",
+            "rawMd": "# Kotlin, the Concise Warrior\n\n![[../kotlin.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | WIND           |\n| Level     | 5              |\n| Type      | Warrior        |\n| ATK       | 1900           |\n| DEF       | 1000           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[EFFECT]**\n> If you control a face-up \"[[Java, the Robust Guardian]]\", you can Special Summon this card from your hand. You can pay 1000 Life Points; this card can attack your opponent directly this turn.\n\n## Artwork Description\nA sleek, blue-and-white armored warrior with a flowing blue cape, dual-wielding short blades. Surrounded by streaming code in a dynamic action pose.\n\n## Synergies\n- Directly requires [[Java, the Robust Guardian]] for Special Summon\n- Direct attack capability for finishing plays\n- Aggressive complement to [[Python, the Script-Snake]]'s stall\n\n## Tags\n#monster #effect #wind #programming-language #level5\n"
+      },
+      {
+            "title": "Lisp, the Macro-Rendas Wizard",
+            "image": "./lisp.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "DARK",
+                  "Level": "7",
+                  "Type": "Spellcaster",
+                  "ATK": "2500",
+                  "DEF": "2000",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "Once per turn, you can pay 500 Life Points to choose 1 Spell Card from your Deck and place it on top of your Deck.",
+            "artwork": "An ancient wizard with a long white beard, wearing elaborate blue robes with Celtic knot patterns. He holds a staff in one hand and conjures a glowing orb displaying \"(DEFINE MACRO (FOO ...))\". Surrounded by Lisp code and digital interfaces.",
+            "slug": "lisp--the-macro-rendas-wizard",
+            "rawMd": "# Lisp, the Macro-Rendas Wizard\n\n![[../lisp.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | DARK           |\n| Level     | 7              |\n| Type      | Spellcaster    |\n| ATK       | 2500           |\n| DEF       | 2000           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[EFFECT]**\n> Once per turn, you can pay 500 Life Points to choose 1 Spell Card from your Deck and place it on top of your Deck.\n\n## Artwork Description\nAn ancient wizard with a long white beard, wearing elaborate blue robes with Celtic knot patterns. He holds a staff in one hand and conjures a glowing orb displaying \"(DEFINE MACRO (FOO ...))\". Surrounded by Lisp code and digital interfaces.\n\n## Synergies\n- Deck manipulation pairs with any strategy\n- Search for Spell support for [[Descartes, the Existential Sorcerer]]\n- High ATK makes it a strong standalone beater alongside [[SQL, the Data Devourer]]\n\n## Tags\n#monster #effect #dark #programming-language #level7\n"
+      },
+      {
+            "title": "Python, the Script-Snake",
+            "image": "./pytohn.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "WIND",
+                  "Level": "4",
+                  "Type": "Reptile",
+                  "ATK": "1800",
+                  "DEF": "1200",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "Once per turn, you can target 1 face-up monster your opponent controls; that target cannot declare an attack until the end of your opponent's next turn.",
+            "artwork": "A glowing green digital serpent coiled in a matrix of code, with the Python logo visible. Background filled with JavaScript and Python code snippets.",
+            "slug": "python--the-script-snake",
+            "rawMd": "# Python, the Script-Snake\n\n![[../pytohn.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | WIND           |\n| Level     | 4              |\n| Type      | Reptile        |\n| ATK       | 1800           |\n| DEF       | 1200           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[EFFECT]**\n> Once per turn, you can target 1 face-up monster your opponent controls; that target cannot declare an attack until the end of your opponent's next turn.\n\n## Artwork Description\nA glowing green digital serpent coiled in a matrix of code, with the Python logo visible. Background filled with JavaScript and Python code snippets.\n\n## Synergies\n- Works well with [[Java, the Robust Guardian]] for board control\n- Can stall while [[Kotlin, the Concise Warrior]] sets up\n- Pairs with [[Lisp, the Macro-Rendas Wizard]] for combo plays\n\n## Tags\n#monster #effect #wind #programming-language #level4\n"
+      },
+      {
+            "title": "SQL, the Data Devourer",
+            "image": "./sql.webp",
+            "category": "Programming Language Monsters",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "DARK",
+                  "Level": "7",
+                  "Type": "Machine",
+                  "ATK": "2800",
+                  "DEF": "2400",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "When this card is Summoned: You can target up to 2 cards in your opponent's Spell & Trap Zone; send them to the GY. This card cannot attack during the turn you activate this effect.",
+            "artwork": "A massive armored machine-humanoid with SQL command plates embedded in its body: \"SELECT\", \"WHERE\", \"DELETE FROM\", \"JOIN\", \"INDEX\". Glowing blue core in chest. Database icons and key symbols border the card art.",
+            "slug": "sql--the-data-devourer",
+            "rawMd": "# SQL, the Data Devourer\n\n![[../sql.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | DARK           |\n| Level     | 7              |\n| Type      | Machine        |\n| ATK       | 2800           |\n| DEF       | 2400           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Programming Language Monsters|Programming Language Monster]]\n\n## Card Text\n\n> **[EFFECT]**\n> When this card is Summoned: You can target up to 2 cards in your opponent's Spell & Trap Zone; send them to the GY. This card cannot attack during the turn you activate this effect.\n\n## Artwork Description\nA massive armored machine-humanoid with SQL command plates embedded in its body: \"SELECT\", \"WHERE\", \"DELETE FROM\", \"JOIN\", \"INDEX\". Glowing blue core in chest. Database icons and key symbols border the card art.\n\n## Synergies\n- Spell/Trap removal clears the way for [[Kotlin, the Concise Warrior]] direct attacks\n- Heavy hitter alongside [[Lisp, the Macro-Rendas Wizard]]\n- Can clear [[Ontological Tautology]] if opponent controls it\n\n## Tags\n#monster #effect #dark #programming-language #level7\n"
+      },
+      {
+            "title": "Descartes, the Existential Sorcerer",
+            "image": "./descartes v2.webp",
+            "category": "Descartes Monster",
+            "properties": {
+                  "Card Type": "Effect Monster",
+                  "Attribute": "LIGHT",
+                  "Level": "6",
+                  "Type": "Spellcaster",
+                  "ATK": "2400",
+                  "DEF": "2000",
+                  "Code": "CD001",
+                  "Edition": "1st Edition"
+            },
+            "effect": "",
+            "artwork": "Same Descartes meditating figure as [[I Think, Therefore I Am]], but now framed as a golden-bordered monster card. Swirling \"COGITO\", \"SELF-AWARENESS\" text. Empty set symbols and \"null\" values surround him on the red grid.",
+            "slug": "descartes--the-existential-sorcerer",
+            "rawMd": "# Descartes, the Existential Sorcerer\n\n![[../descartes v2.webp]]\n\n| Property  | Value          |\n| --------- | -------------- |\n| Card Type | Effect Monster |\n| Attribute | LIGHT          |\n| Level     | 6              |\n| Type      | Spellcaster    |\n| ATK       | 2400           |\n| DEF       | 2000           |\n| Code      | CD001          |\n| Edition   | 1st Edition    |\n\n## Category\n[[Home#Descartes Monster|Descartes Monster]]\n\n## Card Text\n\n> **[MONSTER EFFECT]**\n> Level 6/LIGHT/Spellcaster. ATK/2400 DEF/2000.\n> This card can be Special Summoned by your effect that names a \"Descartes Token\".\n>\n> **[EFFECT]** Once per turn, you can pay 1000 Life Points to negate a Spell or Trap card activated by your opponent.\n\n## Artwork Description\nSame Descartes meditating figure as [[I Think, Therefore I Am]], but now framed as a golden-bordered monster card. Swirling \"COGITO\", \"SELF-AWARENESS\" text. Empty set symbols and \"null\" values surround him on the red grid.\n\n## Synergies\n- Summoned via [[I Think, Therefore I Am]]'s Descartes Token\n- Spell/Trap negation protects your board\n- Can evolve into [[Descartes' Conscious Summon]] for ultimate form\n- Protected by [[Kant's Categorical Imperative]] against repeated removal\n\n## Tags\n#monster #effect #light #spellcaster #philosophy #descartes #level6\n"
+      }
     ],
-
-    categories: [
-      { title: "Programming Language Monsters", desc: "Seven digital entities forged from the languages of creation \u2014 each wielding the power of the code they embody.", count: 7, startIdx: 0 },
-      { title: "Trap Cards\nPhilosophy & Mathematics", desc: "Eight counter-spells drawn from the deepest wells of logic, ethics, and existential thought.", count: 8, startIdx: 7 },
-      { title: "Descartes Monster", desc: "The Existential Sorcerer \u2014 born from doubt, empowered by consciousness.", count: 1, startIdx: 15 },
-      { title: "AWS Cloud Monsters", desc: "Eight machine-type guardians of the cloud infrastructure \u2014 services made sentient.", count: 8, startIdx: 16 },
-      { title: "Golden Boss Cards", desc: "The three supreme entities. Rare. Powerful. Nearly unstoppable.", count: 3, startIdx: 24 },
-    ]
   },
 
   computed: {
-    spreads: function () {
-      var result = [{ type: 'toc' }];
-      var catIdx = 0;
+    categories: function () {
+      if (!this.cards || this.cards.length === 0) return [];
+      var cats = [];
+      var currentCatName = null;
+      var self = this;
       for (var i = 0; i < this.cards.length; i++) {
-        if (catIdx < this.categories.length && i === this.categories[catIdx].startIdx) {
-          result.push({ type: 'category', catIndex: catIdx });
-          catIdx++;
+        var card = this.cards[i];
+        if (!currentCatName || currentCatName !== card.category) {
+          currentCatName = card.category;
+          cats.push({
+            name: card.category,
+            title: card.category.replace(' \u2014 ', '\n').replace(' - ', '\n'),
+            startIdx: i,
+            count: 0,
+            desc: self.getCategoryDesc(card.category),
+            symbol: self.getCategorySymbol(card.category)
+          });
         }
-        result.push({ type: 'card', cardIndex: i });
+        cats[cats.length - 1].count++;
       }
-      return result;
+      return cats;
     },
-
+    spreads: function () {
+      if (!this.cards || this.cards.length === 0) return [];
+      var s = [{ type: 'toc' }];
+      this.categories.forEach(function (cat, idx) {
+        s.push({ type: 'category', catIndex: idx });
+        for (var i = 0; i < cat.count; i++) {
+          s.push({ type: 'card', cardIndex: cat.startIdx + i });
+        }
+      });
+      return s;
+    },
     spread: function () {
+      if (!this.spreads || this.spreads.length === 0) return { type: 'toc' };
       return this.spreads[this.currentSpread];
     },
+
 
     currentCard: function () {
       if (this.spread.type === 'card') {
@@ -1786,18 +2319,39 @@ new Vue({
     },
 
     tocTitle: function (cat) {
-      return cat.title.replace('\n', ' \u2014 ');
+      return cat.name.replace(' \u2014 ', ' \u2014 ');
     },
 
     catTitleHtml: function (catIndex) {
-      return this.categories[catIndex].title.replace('\n', '<br>');
+      return this.categories[catIndex].name.replace(' \u2014 ', '<br>');
     },
 
     catSymbol: function (catIndex) {
-      if (catIndex === 4) return '\u2605';
-      if (catIndex === 0) return '\u2694';
-      if (catIndex === 3) return '\u2601';
-      return '\u2736';
+      return this.getCategorySymbol(this.categories[catIndex].name);
+    },
+
+    getCategoryDesc: function (catName) {
+      if (catName.includes("Golden Boss")) return "Supreme entities of the digital realm. Rare, powerful, and reality-bending.";
+      if (catName.includes("AWS Cloud")) return "Architectural guardians of the infinite infrastructure.";
+      if (catName.includes("Trap Card")) return "Logical paradoxes and philosophical spells to counter any strategy.";
+      if (catName.includes("Programming Language")) return "The elemental forces of creation and logic made manifest.";
+      return "Mysterious entities from the depths of the computer scientist's mind.";
+    },
+
+    getCategorySymbol: function (catName) {
+      if (catName.includes("Golden Boss")) return '★';
+      if (catName.includes("AWS Cloud")) return '☁';
+      if (catName.includes("Trap Card")) return '⚖';
+      if (catName.includes("Programming Language")) return '⚔';
+      return '✶';
+    },
+
+    getStarClass: function (level) {
+      var lv = parseInt(level) || 0;
+      if (lv >= 10) return 'stars-legendary';
+      if (lv >= 7) return 'stars-high';
+      if (lv >= 5) return 'stars-mid';
+      return 'stars-low';
     },
 
     onTouchStart: function (e) {
@@ -1818,6 +2372,27 @@ new Vue({
 
     onImageLoaded: function (key) {
       this.$set(this.imgLoaded, key, true);
+    },
+
+    formatEffect: function (card) {
+      if (card.effect && card.effect.trim()) return card.effect;
+      if (card.rawMd) {
+        // Targeted extraction: everything inside the "Card Text" section
+        var effectMatch = card.rawMd.match(/## Card Text\n\n([\s\S]*?)\n\n##/);
+        if (effectMatch) {
+          var text = effectMatch[1];
+          // 1. Remove blockquote symbols "> "
+          text = text.replace(/^> /gm, '');
+          // 2. Remove Bold headers like "**[MONSTER EFFECT]**"
+          text = text.replace(/\*\*\[.*?\]\*\*/g, '');
+          // 3. Convert [[Link]] to plain text
+          text = text.replace(/\[\[(.*?)(?:\|.*?)?\]\]/g, '$1');
+          // 4. Handle multiple lines/paragraphs
+          text = text.trim().replace(/\n\n/g, '<br><br>').replace(/\n/g, ' ');
+          return text;
+        }
+      }
+      return "No effect text found.";
     },
 
     // Glitter burst at a point
@@ -1888,6 +2463,17 @@ new Vue({
     goToCardGlitter: function (e, cardIndex) {
       this.spawnGlitter(e.clientX, e.clientY, 20, 80);
       this.goToCard(cardIndex);
+    },
+
+    openModal: function (card) {
+      this.modalCard = card;
+      this.isModalOpen = true;
+    },
+
+    closeModal: function () {
+      this.isModalOpen = false;
+      var self = this;
+      setTimeout(function() { self.modalCard = null; }, 300);
     }
   },
 
@@ -1896,6 +2482,10 @@ new Vue({
 
     // Keyboard navigation
     document.addEventListener('keydown', function (e) {
+      if (self.isModalOpen && e.key === 'Escape') {
+        self.closeModal();
+        return;
+      }
       if (!self.bookIsOpen) {
         if (e.key === 'Enter' || e.key === ' ') self.openBook();
         return;

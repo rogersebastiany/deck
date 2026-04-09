@@ -51,3 +51,28 @@ const cards = files.map(file => {
 
 fs.writeFileSync(outputFile, JSON.stringify(cards, null, 2));
 console.log(`Generated ${cards.length} cards in website/cards.json`);
+
+// Invert/Sort cards based on request
+const sortedCards = [...cards].sort((a, b) => {
+  const order = {
+    "Golden Boss Cards": 1,
+    "AWS Cloud Monsters": 2,
+    "Trap Cards \u2014 Philosophy & Mathematics": 3,
+    "Programming Language Monsters": 4,
+    "Descartes Monster": 5
+  };
+  // Normalize string comparisons (removing emojis if any are present in the parsed category)
+  const getRank = (cat) => {
+    if (!cat) return 99;
+    if (cat.includes("Golden Boss")) return 1;
+    if (cat.includes("AWS Cloud")) return 2;
+    if (cat.includes("Trap Card")) return 3;
+    if (cat.includes("Programming Language")) return 4;
+    if (cat.includes("Descartes")) return 5;
+    return 99;
+  };
+  return getRank(a.category) - getRank(b.category);
+});
+
+fs.writeFileSync(outputFile, JSON.stringify(sortedCards, null, 2));
+console.log(`Sorted cards in website/cards.json by: Golden -> AWS -> Traps -> Languages`);
